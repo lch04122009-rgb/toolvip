@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: vipgame-tool
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_IDS
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: BANK_NAME
+        value: MBBANK
+      - key: BANK_ACCOUNT
+        value: "02444128888"
+      - key: BANK_OWNER
+        value: LE CONG HOAN
+      - key: TG_SUPPORT
+        value: "@my201901"
+      - key: PORT
+        value: "10000"
