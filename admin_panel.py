@@ -1,14 +1,8 @@
----
-
-### 🚀 Mã nguồn file `admin_panel.py`:
-
-```python
 import os
 import sys
 import time
 from tabulate import tabulate
 
-# Kéo trực tiếp database JSON từ hệ thống gốc của bạn
 try:
     import db
 except ImportError:
@@ -25,7 +19,6 @@ def print_header(title):
     print(f" {title.center(58)} ")
     print("=" * 60)
 
-# ── 1. XEM THỐNG KÊ HỆ THỐNG ───────────────────────────────────
 def show_stats():
     clear_screen()
     print_header("📊 THỐNG KÊ HỆ THỐNG THỰC TẾ")
@@ -45,13 +38,11 @@ def show_stats():
     print(tabulate(table_data, headers=["Hạng mục", "Số liệu thực tế"], tablefmt="fancy_grid"))
     input("\n[Nhấn Enter để quay lại Menu chính]")
 
-# ── 2. XEM GÓI CƯỚC & TẠO KEY VIP ──────────────────────────────
 def create_key_menu():
     while True:
         clear_screen()
         print_header("🔑 TẠO KEY VIP HỆ THỐNG")
         
-        # Hiển thị danh sách gói từ db.PLANS
         plans_list = []
         for pid, p in db.PLANS.items():
             plans_list.append([pid, p['label'], f"{p['days']} ngày", f"{p['price']:,}đ"])
@@ -78,7 +69,6 @@ def create_key_menu():
                 time.sleep(1.5)
                 continue
         
-        # Gọi hàm tạo hàng loạt từ db.py của bạn
         ok, keys = db.create_keys_batch(pid_choice, count, created_by="CMD_Console")
         if ok and keys:
             print(f"\n✅ Đã tạo thành công {len(keys)} key cho gói [{db.PLANS[pid_choice]['label']}]:")
@@ -91,7 +81,6 @@ def create_key_menu():
         input("\n[Nhấn Enter để tiếp tục]")
         break
 
-# ── 3. DUYỆT ĐƠN NẠP TIỀN (PENDING) ───────────────────────────
 def manage_pending_payments():
     while True:
         clear_screen()
@@ -105,7 +94,6 @@ def manage_pending_payments():
             
         table_rows = []
         for idx, p in enumerate(pending_list, start=1):
-            # Convert timestamp sang chuỗi đọc được bằng hàm ẩn của db.py nếu có, hoặc dùng tạm mặc định
             time_str = db._ts_to_str(p['created_at']) if hasattr(db, '_ts_to_str') else str(p['created_at'])
             table_rows.append([
                 idx, 
@@ -157,7 +145,6 @@ def manage_pending_payments():
                 print("\n❌ Không tìm thấy hoặc đơn đã bị thay đổi trạng thái.")
             time.sleep(2)
 
-# ── 4. XEM LOG HỆ THỐNG ───────────────────────────────────────
 def show_logs():
     clear_screen()
     print_header("📜 LOGS LỊCH SỬ HỆ THỐNG GẦN ĐÂY")
@@ -173,7 +160,6 @@ def show_logs():
         
     input("\n[Nhấn Enter để quay lại Menu chính]")
 
-# ── 5. MENU CHÍNH ─────────────────────────────────────────────
 def main_menu():
     while True:
         clear_screen()
