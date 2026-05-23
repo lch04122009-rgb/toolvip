@@ -172,7 +172,7 @@ def sepay_webhook():
 # ── NOTIFY HELPERS ──────────────────────────
 def _tg_send(chat_id, text):
     import requests
-    token = os.getenv("BOT_TOKEN","")
+    token = os.getenv("BOT_TOKEN","8547766821:AAHxHXAPqYLYWZHiDMLg78chMQeVkGySN1Y")
     if not token: return
     try:
         requests.post(f"https://api.telegram.org/bot{token}/sendMessage",
