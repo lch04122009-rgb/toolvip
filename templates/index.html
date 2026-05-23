@@ -3,1052 +3,627 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>VIP GAME — Live Update</title>
+<title>VIP GAME — Tool Dự Đoán AI</title>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
-:root{
-  /* Palette */
-  --g1:#f5c518; --g2:#e6a800; --g3:#ffd84d; --g4:#c8901a;
-  --dark:#080808; --d2:#101014; --d3:#18181f; --d4:#20202a; --d5:#2a2a36;
-  --red:#ff3d3d; --green:#00d47e; --cyan:#00cfff; --purple:#a855f7;
-  --text:#f0f0f0; --text2:#999; --text3:#555;
-  
-  /* Spacing & Radius */
-  --r:16px; --rs:10px;
-  --safe-bottom: env(safe-area-inset-bottom);
-}
+:root{--g:#f5c518;--g2:#c8901a;--dk:#090909;--d2:#101014;--d3:#181820;--d4:#212130;--d5:#2a2a3a;--red:#ff3e3e;--grn:#00d47e;--cy:#00cfff;--t:#f0f0f0;--t2:#888;--t3:#444;--r:14px;--rs:9px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--dk);color:var(--t);overflow:hidden;position:fixed;inset:0}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 15% 0%,rgba(245,197,24,.06),transparent 55%),radial-gradient(ellipse 60% 50% at 85% 95%,rgba(168,85,247,.05),transparent 55%)}
 
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none}
-html,body{width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--dark);color:var(--text);overflow:hidden;position:fixed;inset:0}
-input,button,select{font-family:inherit}
+/* SCREENS */
+.s{display:none;position:fixed;inset:0;z-index:10}
+.s.v{display:block}
+#sa{display:flex;align-items:center;justify-content:center;padding:18px;overflow-y:auto;min-height:100%}
+#sm{flex-direction:column}#sm.v{display:flex}
 
-/* BACKGROUND FX */
-body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-background:radial-gradient(ellipse 50% 30% at 10% 0%,rgba(245,197,24,.06) 0,transparent 55%),
-radial-gradient(ellipse 40% 30% at 90% 100%,rgba(168,85,247,.05) 0,transparent 55%)}
+/* AUTH */
+.acard{width:100%;max-width:390px;background:var(--d2);border:1px solid rgba(245,197,24,.13);border-radius:22px;padding:28px 22px;position:relative}
+.acard::before{content:'';position:absolute;inset:0;border-radius:22px;background:linear-gradient(150deg,rgba(245,197,24,.04),transparent 55%);pointer-events:none}
+.brand{text-align:center;margin-bottom:24px}
+.bico{display:inline-flex;width:66px;height:66px;border-radius:18px;background:linear-gradient(135deg,var(--g),var(--g2));align-items:center;justify-content:center;margin-bottom:10px;box-shadow:0 0 28px rgba(245,197,24,.22)}
+.bico i{font-size:28px;color:#1a1000}
+.bnm{font-size:22px;font-weight:900;background:linear-gradient(90deg,var(--g),#ffd84d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1px}
+.bsl{font-size:11px;color:var(--t2);margin-top:3px}
+.atabs{display:flex;background:var(--d4);border-radius:var(--rs);padding:3px;gap:3px;margin-bottom:20px}
+.atab{flex:1;padding:9px;font-size:13px;font-weight:700;background:transparent;color:var(--t2);border:none;border-radius:7px;cursor:pointer;transition:.18s}
+.atab.v{background:linear-gradient(135deg,var(--g),var(--g2));color:#1a1000}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:10px;color:var(--t3);margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.fg input{width:100%;padding:11px 14px;background:var(--d4);border:1px solid rgba(255,255,255,.07);border-radius:var(--rs);color:var(--t);font-size:14px;outline:none;transition:.18s;font-family:inherit}
+.fg input:focus{border-color:var(--g);background:var(--d3)}
+.pw{position:relative}.pw input{padding-right:40px}
+.eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t3);font-size:14px;cursor:pointer;padding:4px}
+.aerr{font-size:12px;color:var(--red);min-height:17px;text-align:center;margin:4px 0 8px}
+.btng{width:100%;padding:12px;background:linear-gradient(135deg,var(--g),var(--g2));color:#1a1000;font-size:14px;font-weight:900;border:none;border-radius:var(--rs);cursor:pointer;letter-spacing:.4px;transition:.18s;font-family:inherit}
+.btng:active{transform:scale(.98)}
+.asw{text-align:center;font-size:12px;color:var(--t2);margin-top:11px}.asw span{color:var(--g);cursor:pointer;font-weight:700}
 
-/* ══════════ LOADING OVERLAY ══════════ */
-#loader-overlay{position:fixed;inset:0;background:var(--dark);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
-.spinner{width:50px;height:50px;border:4px solid rgba(245,197,24,.1);border-left-color:var(--g1);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:15px}
-@keyframes spin{100%{transform:rotate(360deg)}}
-.load-txt{font-size:14px;color:var(--text2);font-weight:500}
+/* TOPBAR */
+.tb{background:var(--d2);border-bottom:1px solid rgba(255,255,255,.05);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:50}
+.tb-l{display:flex;align-items:center;gap:8px}
+.tb-ic{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--g),var(--g2));display:flex;align-items:center;justify-content:center;font-size:14px;color:#1a1000}
+.tb-nm{font-size:15px;font-weight:900;background:linear-gradient(90deg,var(--g),#ffd84d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tb-r{display:flex;align-items:center;gap:6px}
+.chip{display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--d3);border:1px solid rgba(255,255,255,.07);border-radius:20px;cursor:pointer}
+.av{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--g),var(--g2));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#1a1000;flex-shrink:0}
+.unm{font-size:12px;font-weight:700}
+.vtag{background:linear-gradient(135deg,var(--g),var(--g2));color:#1a1000;font-size:9px;font-weight:900;padding:2px 6px;border-radius:8px}
+.ibtn{background:var(--d3);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:6px 9px;color:var(--t2);font-size:14px;cursor:pointer;transition:.18s}
+.ibtn:hover{border-color:var(--g);color:var(--g)}
 
-/* ══════════ SCREEN MANAGEMENT ══════════ */
-.scr{display:none;position:absolute;inset:0;width:100%;height:100%;z-index:10;background:var(--dark);flex-direction:column}
-.scr.active{display:flex;animation:fadeIn .4s ease forwards}
-@keyframes fadeIn{from{opacity:0;transform:scale(0.98)}to{opacity:1;transform:scale(1)}}
-#sa{z-index:50;background:var(--dark)}
+/* BANNER */
+.ban{padding:10px 14px;background:linear-gradient(135deg,rgba(245,197,24,.07),rgba(168,85,247,.04));border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
+.ban h3{font-size:13px;font-weight:800;color:var(--g)}.ban p{font-size:11px;color:var(--t2);margin-top:2px}
+.kbadge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700}
+.kon{background:rgba(0,212,126,.1);border:1px solid rgba(0,212,126,.22);color:var(--grn)}
+.koff{background:rgba(255,62,62,.1);border:1px solid rgba(255,62,62,.2);color:var(--red)}
+.dp{width:6px;height:6px;border-radius:50%;animation:dp 1.5s infinite}
+.dpg{background:var(--grn)}.dpr{background:var(--red)}
+@keyframes dp{0%,100%{opacity:1}50%{opacity:.25}}
+.kexp{font-size:10px;color:var(--g);margin-top:3px;text-align:right}
 
-/* ══════════ AUTH SCREEN ══════════ */
-#sa{align-items:center;justify-content:center;padding:20px;overflow-y:auto}
-.acard{width:100%;max-width:400px;background:var(--d2);border:1px solid rgba(245,197,24,.15);border-radius:24px;padding:32px 24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.4)}
-.acard::after{content:'';position:absolute;inset:0;background:linear-gradient(145deg,rgba(245,197,24,.03) 0,transparent 50%);pointer-events:none;border-radius:24px}
+/* BODY */
+.mb{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:68px}
 
-.brand{text-align:center;margin-bottom:28px}
-.brand-ico{display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;border-radius:22px;background:linear-gradient(135deg,var(--g1),var(--g4));margin-bottom:12px;box-shadow:0 0 30px rgba(245,197,24,.3)}
-.brand-ico i{font-size:32px;color:#1a1000}
-.brand-nm{font-size:26px;font-weight:900;background:linear-gradient(90deg,var(--g1),var(--g3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1px}
-.brand-sl{font-size:12px;color:var(--text2);margin-top:6px;font-weight:500}
+/* SECTION */
+.sec{padding:13px 14px}
+.st{font-size:11px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px;display:flex;align-items:center;gap:6px}
+.st i{color:var(--g)}
 
-.atabs{display:flex;background:var(--d4);border-radius:var(--rs);padding:4px;gap:4px;margin-bottom:24px}
-.atab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:700;background:transparent;color:var(--text2);border:none;border-radius:8px;cursor:pointer;transition:.2s}
-.atab.active{background:linear-gradient(135deg,var(--g1),var(--g2));color:#1a1000;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+/* GAME GRID */
+.gg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gc{background:var(--d2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.18s;position:relative}
+.gc:active{transform:scale(.97)}
+.gc.sel{border-color:var(--g);box-shadow:0 0 16px rgba(245,197,24,.13)}
+.gc-img{height:108px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#0d0d14}
+.gc-img img{width:90px;height:90px;object-fit:contain;border-radius:16px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6))}
+.gc-sc{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.8);border-radius:9px;padding:2px 7px;font-size:10px;font-weight:700;color:var(--g)}
+.gc-hot{position:absolute;top:6px;right:6px;background:linear-gradient(135deg,var(--red),#ff6a00);border-radius:7px;padding:2px 6px;font-size:9px;font-weight:900;color:#fff}
+.gc-body{padding:8px 10px 11px}
+.gc-nm{font-size:13px;font-weight:800;color:var(--t);margin-bottom:2px}
+.gc-ai{font-size:11px;color:var(--t2);margin-bottom:7px}
+.gcbtn{width:100%;padding:7px;background:linear-gradient(135deg,var(--g),var(--g2));color:#1a1000;font-size:12px;font-weight:900;border:none;border-radius:var(--rs);cursor:pointer;font-family:inherit;transition:.15s}
+.gcbtn.lk{background:var(--d5);color:var(--t3);cursor:not-allowed}
+.gcbtn:not(.lk):active{transform:scale(.96)}
 
-.fg{margin-bottom:16px}
-.fg label{display:block;font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-.fg input{width:100%;padding:13px 16px;background:var(--d4);border:1px solid rgba(255,255,255,.08);border-radius:var(--rs);color:var(--text);font-size:15px;transition:.2s}
-.fg input:focus{border-color:var(--g1);background:var(--d3);box-shadow:0 0 0 3px rgba(245,197,24,.1)}
-.pww{position:relative}
-.pww input{padding-right:45px}
-.pweye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:5px}
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--d2);border-top:1px solid rgba(255,255,255,.06);display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom,0px)}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 4px 7px;cursor:pointer;color:var(--t3);font-size:10px;font-weight:600;gap:3px;border:none;background:none;font-family:inherit;transition:.15s}
+.bni i{font-size:19px}
+.bni.v{color:var(--g)}.bni.v i{filter:drop-shadow(0 0 5px rgba(245,197,24,.45))}
 
-.aerr{font-size:12px;color:var(--red);min-height:20px;text-align:center;margin:6px 0 10px}
-.btn-g{width:100%;padding:14px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#1a1000;font-size:15px;font-weight:900;border:none;border-radius:var(--rs);cursor:pointer;letter-spacing:.5px;transition:.2s;margin-top:10px}
-.btn-g:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(245,197,24,.3)}
-.btn-g:active{transform:translateY(0)}
-.btn-g:disabled{opacity:.6;cursor:not-allowed;filter:grayscale(1)}
-.asw{text-align:center;font-size:13px;color:var(--text2);margin-top:16px}
-.asw span{color:var(--g1);cursor:pointer;font-weight:700;text-decoration:underline}
+/* PANELS */
+.pnl{position:fixed;inset:0;z-index:200;display:none;align-items:flex-end}
+.pnl.v{display:flex}
+.pbg{position:absolute;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(5px)}
+.pbox{background:var(--d2);border-radius:22px 22px 0 0;width:100%;max-height:93vh;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;z-index:1;padding-bottom:env(safe-area-inset-bottom,0px)}
+.ph{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.1);margin:11px auto 0}
+.phd{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 9px}
+.ptit{font-size:16px;font-weight:900;color:var(--g)}
+.pclose{background:var(--d4);border:none;color:var(--t2);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.pb{padding:0 15px 22px}
+.mi{display:flex;align-items:center;gap:11px;padding:13px 15px;background:var(--d3);border-radius:var(--rs);margin-bottom:7px;cursor:pointer;border:1px solid rgba(255,255,255,.05);font-size:14px;font-weight:700;color:var(--t);transition:.15s}
+.mi:active{transform:scale(.98)}
+.mi i{font-size:17px;width:20px;text-align:center}
+.mi.red{color:var(--red)}
+.sep{height:1px;background:rgba(255,255,255,.05);margin:10px 0}
 
-/* ══════════ MAIN APP LAYOUT ══════════ */
-#sm{background:transparent}
-.topbar{background:rgba(16,16,20,.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.05);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:20;position:relative}
-.tb-l{display:flex;align-items:center;gap:10px}
-.tb-logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--g1),var(--g4));display:flex;align-items:center;justify-content:center;font-size:16px;color:#1a1000;box-shadow:0 0 15px rgba(245,197,24,.2)}
-.tb-title{font-size:16px;font-weight:900;background:linear-gradient(90deg,var(--g1),var(--g3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.tb-r{display:flex;align-items:center;gap:8px}
-.tb-chip{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--d3);border:1px solid rgba(255,255,255,.08);border-radius:30px;cursor:pointer;transition:.2s}
-.tb-chip:active{transform:scale(.95)}
-.tb-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--g1),var(--g4));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#1a1000;flex-shrink:0}
-.tb-uname{font-size:13px;font-weight:700;color:var(--text)}
-.viptag{background:linear-gradient(135deg,var(--g1),var(--g2));color:#1a1000;font-size:9px;font-weight:900;padding:2px 8px;border-radius:6px;margin-left:4px}
-.tb-ibtn{background:var(--d3);border:1px solid rgba(255,255,255,.08);border-radius:50%;width:38px;height:38px;color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
-.tb-ibtn:hover{color:var(--g1);border-color:var(--g1)}
+/* PAYMENT */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px}
+.pc{background:var(--d3);border:2px solid rgba(255,255,255,.07);border-radius:var(--r);padding:13px 10px;cursor:pointer;transition:.18s;text-align:center;position:relative;overflow:hidden}
+.pc:active{transform:scale(.97)}
+.pc.sel{border-color:var(--g);background:rgba(245,197,24,.05)}
+.phot{position:absolute;top:0;right:0;background:linear-gradient(135deg,var(--red),#ff6a00);font-size:9px;font-weight:900;color:#fff;padding:3px 7px;border-radius:0 var(--r) 0 var(--rs)}
+.pd{font-size:11px;font-weight:800;color:var(--g);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.pp{font-size:21px;font-weight:900;line-height:1.1}.pp sup{font-size:12px;font-weight:600;color:var(--t2)}
+.pdur{font-size:11px;color:var(--t2);margin-top:4px}
+.qrc{background:var(--d3);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);padding:13px}
+.qt{text-align:center;font-size:12px;color:var(--g);margin-bottom:9px;display:flex;align-items:center;justify-content:center;gap:5px;font-weight:700}
+.qcd{background:rgba(245,197,24,.1);border-radius:7px;padding:2px 11px;font-family:monospace;font-size:14px;font-weight:900;color:var(--g)}
+.qcd.r{color:var(--red);background:rgba(255,62,62,.1)}
+.qtop{display:flex;gap:12px;align-items:flex-start}
+.qbox{width:124px;height:124px;border-radius:var(--rs);background:#fff;padding:4px;flex-shrink:0}
+.qbox img{width:100%;height:100%;border-radius:7px;display:block}
+.qm{flex:1}
+.qr{display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.qr:last-child{border:none}
+.ql{color:var(--t2)}.qv{font-weight:700;font-size:11px}.qv.gd{color:var(--g);font-size:13px}
+.txb{display:flex;align-items:center;gap:6px;margin-top:9px;padding:8px 9px;background:var(--d4);border:1px solid rgba(245,197,24,.14);border-radius:var(--rs)}
+.txt{font-family:monospace;font-size:13px;font-weight:900;color:var(--g);letter-spacing:1.3px;flex:1}
+.cpbtn{background:rgba(245,197,24,.11);border:1px solid rgba(245,197,24,.18);color:var(--g);border-radius:7px;padding:5px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+.pcta{width:100%;padding:12px;background:linear-gradient(135deg,var(--grn),#009e5c);color:#fff;font-size:14px;font-weight:900;border:none;border-radius:var(--rs);cursor:pointer;font-family:inherit;margin-top:9px;display:flex;align-items:center;justify-content:center;gap:7px;transition:.15s}
+.pcta:active{transform:scale(.98)}
+.pnote{font-size:11px;color:var(--t3);text-align:center;margin-top:7px}
 
-/* ══════════ CONTENT AREA ══════════ */
-.mbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:80px;position:relative;z-index:5;padding:0}
-.tab-content{display:none;animation:slideUp .3s ease}
-.tab-content.active{display:block}
-@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* KEY */
+.abox{background:var(--d3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:13px;margin-bottom:13px}
+.arow{display:flex;gap:7px}
+.arow input{flex:1;padding:10px 11px;background:var(--d4);border:1px solid rgba(255,255,255,.07);border-radius:var(--rs);color:var(--t);font-size:12px;outline:none;font-family:monospace;letter-spacing:.8px;text-transform:uppercase;font-weight:700;transition:.18s}
+.arow input:focus{border-color:var(--g)}
+.abtn{padding:10px 14px;background:linear-gradient(135deg,var(--g),var(--g2));color:#1a1000;font-size:13px;font-weight:900;border:none;border-radius:var(--rs);cursor:pointer;font-family:inherit;white-space:nowrap}
+.kerr{font-size:12px;min-height:17px;margin-top:6px}
+.kerr.e{color:var(--red)}.kerr.ok{color:var(--grn)}
 
-/* Banner */
-.banner{padding:16px;margin:14px 14px 0;background:linear-gradient(135deg,rgba(245,197,24,.08),rgba(168,85,247,.04));border:1px solid rgba(245,197,24,.1);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;gap:12px}
-.ban-txt h3{font-size:15px;font-weight:800;color:var(--text)}
-.ban-txt p{font-size:12px;color:var(--text2);margin-top:4px}
-.ks-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:30px;font-size:12px;font-weight:700}
-.ks-on{background:rgba(0,212,126,.1);border:1px solid rgba(0,212,126,.2);color:var(--green)}
-.ks-off{background:rgba(255,61,61,.08);border:1px solid rgba(255,61,61,.15);color:var(--red)}
-.dot{width:8px;height:8px;border-radius:50%}
-.dot.g{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.5s infinite}
-.dot.r{background:var(--red)}
-@keyframes pulse{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}
+/* KEY TABLE */
+.kt{background:var(--d3);border-radius:var(--r);overflow:hidden;margin-bottom:13px;border:1px solid rgba(255,255,255,.05)}
+.kth{display:grid;grid-template-columns:2fr 1.2fr .8fr .9fr;padding:8px 11px;background:rgba(245,197,24,.05);border-bottom:1px solid rgba(255,255,255,.05)}
+.kth span{font-size:9px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.4px}
+.ktr{display:grid;grid-template-columns:2fr 1.2fr .8fr .9fr;padding:9px 11px;border-bottom:1px solid rgba(255,255,255,.03);align-items:center}
+.ktr:last-child{border:none}
+.kkey{font-family:monospace;font-size:10px;font-weight:700;color:var(--cy)}
+.kpl{font-size:10px;color:var(--g);font-weight:700}
+.kr{font-size:10px;font-weight:700}.krg{color:var(--grn)}.kry{color:var(--g)}.krr{color:var(--red)}
+.kst{font-size:9px;padding:2px 6px;border-radius:7px;font-weight:700;display:inline-block}
+.kst.on{background:rgba(0,212,126,.11);color:var(--grn)}.kst.ex{background:rgba(255,62,62,.1);color:var(--red)}.kst.av{background:rgba(245,197,24,.1);color:var(--g)}
 
-/* Section */
-.sec{padding:14px}
-.sec-title{font-size:12px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
-.sec-title i{color:var(--g1)}
+/* HISTORY */
+.hi{background:var(--d3);border:1px solid rgba(255,255,255,.05);border-radius:var(--rs);padding:9px 11px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:9px}
+.ha{font-size:12px;font-weight:700;color:var(--t);margin-bottom:2px}.ht{font-size:10px;color:var(--t3)}
+.empty{text-align:center;padding:38px 20px;color:var(--t3)}.empty i{font-size:38px;display:block;margin-bottom:9px;opacity:.35}.empty p{font-size:13px}
 
-/* Grid Games */
-.ggrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.gcard{background:var(--d2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.2s;position:relative}
-.gcard:active{transform:scale(.97)}
-.gcard.running{border-color:var(--g1);box-shadow:0 0 20px rgba(245,197,24,.15)}
-.gc-thumb{height:100px;display:flex;align-items:center;justify-content:center;position:relative;background:linear-gradient(160deg,#1a1a22,#121216)}
-.gc-emoji{font-size:48px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
-.gc-score{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);border-radius:10px;padding:3px 8px;font-size:10px;font-weight:700;color:var(--g1);border:1px solid rgba(245,197,24,.2)}
-.gc-hot{position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#ff3d3d,#ff6a00);border-radius:6px;padding:2px 6px;font-size:9px;font-weight:900;color:#fff;box-shadow:0 2px 6px rgba(255,61,61,.3)}
-.gc-body{padding:10px 12px 12px}
-.gc-name{font-size:14px;font-weight:800;color:var(--text);margin-bottom:4px}
-.gc-ai{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px;margin-bottom:8px}
-.gc-btn{width:100%;padding:9px;background:var(--d4);color:var(--text3);font-size:12px;font-weight:700;border:none;border-radius:var(--rs);cursor:pointer;transition:.2s}
-.gc-btn.vip{background:linear-gradient(135deg,var(--g1),var(--g2));color:#1a1000;box-shadow:0 2px 8px rgba(245,197,24,.2)}
-.gc-btn.vip:active{transform:scale(.95)}
+/* SUPPORT BAR */
+.sb{display:flex;align-items:center;gap:11px;padding:11px 13px;background:var(--d3);border-radius:var(--r);margin-top:9px;border:1px solid rgba(255,255,255,.05)}
+.sbi{width:36px;height:36px;border-radius:50%;background:rgba(0,136,204,.14);color:#0088cc;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.sbt{flex:1}.sbt strong{font-size:13px;font-weight:700;display:block}.sbt span{font-size:11px;color:var(--t2)}
+.sblink{padding:7px 13px;border-radius:var(--rs);font-size:12px;font-weight:800;text-decoration:none;color:#fff;background:linear-gradient(135deg,#0088cc,#006699);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 
-/* ══════════ PAYMENT UI ══════════ */
-.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-.pcard{background:var(--d3);border:2px solid rgba(255,255,255,.07);border-radius:var(--r);padding:16px 10px;cursor:pointer;transition:.2s;text-align:center;position:relative}
-.pcard:active{transform:scale(.97)}
-.pcard.selected{border-color:var(--g1);background:rgba(245,197,24,.05)}
-.phot{position:absolute;top:0;right:0;background:linear-gradient(135deg,var(--red),#ff6a00);font-size:9px;font-weight:900;color:#fff;padding:4px 8px;border-radius:0 var(--r) 0 8px}
-.pdays{font-size:11px;font-weight:800;color:var(--g1);text-transform:uppercase;margin-bottom:6px}
-.pprice{font-size:24px;font-weight:900;color:var(--text);line-height:1}
-.pprice sub{font-size:13px;font-weight:600;color:var(--text2);bottom:0}
-.pdur{font-size:11px;color:var(--text3);margin-top:6px}
+/* PRED POPUP */
+.pp{position:fixed;top:76px;right:13px;width:200px;z-index:300;display:none;border-radius:18px;overflow:hidden;background:rgba(11,11,18,.97);backdrop-filter:blur(22px);border:1px solid rgba(245,197,24,.11);box-shadow:0 8px 36px rgba(0,0,0,.55),0 0 20px rgba(245,197,24,.05);animation:pf 4s ease-in-out infinite;user-select:none}
+.pp.v{display:block}
+@keyframes pf{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.ppin{padding:10px}
+.ppdrag{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;cursor:grab;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.05)}
+.ppdrag:active{cursor:grabbing}
+.pphd{font-size:9px;font-weight:800;color:var(--g);letter-spacing:.6px;text-transform:uppercase;display:flex;align-items:center;gap:4px}
+.ppcl{background:none;border:none;color:var(--t3);font-size:12px;cursor:pointer;padding:2px}
+.ppcn{text-align:center;font-size:10px;color:var(--t2);margin-bottom:6px;background:rgba(255,255,255,.04);border-radius:6px;padding:3px 6px}
+.ppcn b{color:var(--g)}
+.pps{display:flex;justify-content:space-between;background:rgba(255,255,255,.04);border-radius:7px;padding:4px 8px;margin-bottom:8px;font-size:10px}
+.ppsl{color:var(--t2)}.ppsi{font-family:monospace;font-weight:900;color:var(--cy)}
+.circles{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:7px}
+.ci{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;border:2px solid rgba(255,255,255,.07);color:rgba(255,255,255,.2);transition:.28s;letter-spacing:.2px}
+.cit{border-color:rgba(0,212,126,.16)}.cix{border-color:rgba(255,62,62,.16)}
+.ci.at{background:rgba(0,212,126,.11);border-color:var(--grn);color:var(--grn);box-shadow:0 0 16px rgba(0,212,126,.28);animation:cp .4s ease}
+.ci.ax{background:rgba(255,62,62,.11);border-color:var(--red);color:var(--red);box-shadow:0 0 16px rgba(255,62,62,.28);animation:cp .4s ease}
+@keyframes cp{0%{transform:scale(.8)}65%{transform:scale(1.1)}100%{transform:scale(1)}}
+.ppres{text-align:center;margin-bottom:6px}
+.pppt{font-size:19px;font-weight:900;line-height:1.2}
+.ppcf{font-size:10px;color:var(--t2);margin-top:2px}
+.ppcf b{color:var(--g)}
+.ppst{display:flex;align-items:center;gap:5px;padding-top:6px;border-top:1px solid rgba(255,255,255,.04)}
+.sd{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sdg{background:var(--grn);animation:dp 1.5s infinite}.sdy{background:var(--g)}.sdr{background:var(--red)}
+.stx{font-size:10px;color:var(--t2);font-weight:600}
 
-.qrcard{background:var(--d3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:20px;text-align:center;position:relative;overflow:hidden}
-.qrcard.loading::after{content:'';position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff}
-.qrcard.loading i{font-size:40px;margin-bottom:15px;animation:spin 1s linear infinite}
+/* TOAST */
+.toast{position:fixed;bottom:74px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--d3);border:1px solid rgba(255,255,255,.08);color:var(--t);padding:9px 18px;border-radius:18px;font-size:12px;font-weight:700;z-index:900;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis}
+.toast.v{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:var(--grn);color:var(--grn)}.toast.er{border-color:var(--red);color:var(--red)}.toast.gd{border-color:var(--g);color:var(--g)}
 
-.qrtimer{font-size:13px;color:var(--text2);margin-bottom:15px;display:flex;align-items:center;justify-content:center;gap:8px}
-.timer-box{background:var(--d4);padding:4px 10px;border-radius:6px;font-family:monospace;font-weight:700;color:var(--cyan);border:1px solid rgba(0,207,255,.2)}
-.timer-box.warn{color:var(--red);border-color:var(--red);animation:blink 1s infinite}
-@keyframes blink{50%{opacity:.5}}
-
-.qrtop{display:flex;gap:16px;align-items:flex-start;justify-content:center;margin-bottom:16px}
-.qrbox{width:140px;height:140px;border-radius:12px;background:#fff;padding:6px;flex-shrink:0;box-shadow:0 10px 30px rgba(0,0,0,.3)}
-.qrbox img{width:100%;height:100%;border-radius:8px}
-.qrmeta{text-align:left}
-.qrrow{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)}
-.qrrow:last-child{border-bottom:none}
-.qrl{color:var(--text3)}
-.qrv{font-weight:700;color:var(--text);text-align:right}
-.qrv.amt{color:var(--g1);font-size:16px}
-
-.txnbox{display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px;background:var(--d4);border-radius:var(--rs);border:1px solid rgba(255,255,255,.05)}
-.txntxt{flex:1;font-family:monospace;font-size:13px;font-weight:700;color:var(--g1);letter-spacing:1px;text-transform:uppercase}
-.copybtn{background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.2);color:var(--g1);border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
-.copybtn:active{transform:scale(.95)}
-
-.paycta{width:100%;padding:14px;background:linear-gradient(135deg,var(--green),#00a86b);color:#fff;font-size:14px;font-weight:900;border:none;border-radius:var(--rs);margin-top:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 15px rgba(0,212,126,.3);transition:.2s}
-.paycta:active{transform:scale(.98)}
-.paycta:disabled{filter:grayscale(1);opacity:.7;cursor:wait}
-.paynote{font-size:11px;color:var(--text3);margin-top:10px;line-height:1.5}
-
-/* ══════════ KEY INPUT ══════════ */
-.actbox{background:var(--d3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:16px;margin-bottom:20px}
-.act-title{font-size:13px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;color:var(--text)}
-.actrow{display:flex;gap:10px}
-.actrow input{flex:1;padding:12px;background:var(--d4);border:1px solid rgba(255,255,255,.08);border-radius:var(--rs);color:var(--text);font-family:monospace;letter-spacing:1px;text-transform:uppercase;font-weight:700}
-.actrow input:focus{border-color:var(--g1)}
-.actbtn{padding:0 20px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#1a1000;font-weight:900;border:none;border-radius:var(--rs);cursor:pointer;white-space:nowrap}
-.acterr{font-size:12px;min-height:20px;margin-top:8px}
-.acterr.ok{color:var(--green)}
-.acterr.bad{color:var(--red)}
-
-/* Key Table */
-.ktable{background:var(--d3);border-radius:var(--r);overflow:hidden;border:1px solid rgba(255,255,255,.05)}
-.kth{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;padding:10px 14px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.05)}
-.kth span{font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase}
-.ktr{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.03);align-items:center}
-.ktr:last-child{border-bottom:none}
-.kkey{font-family:monospace;font-size:11px;font-weight:700;color:var(--cyan)}
-.kplan{font-size:11px;color:var(--g1);font-weight:700}
-.krem{font-size:11px;font-weight:700}
-.krem.on{color:var(--green)} .krem.ex{color:var(--red)}
-.kst{font-size:9px;padding:3px 8px;border-radius:6px;font-weight:700;text-align:center;display:inline-block}
-.kst.vip{background:rgba(245,197,24,.1);color:var(--g1)} .kst.exp{background:rgba(255,61,61,.1);color:var(--red)}
-
-/* History */
-.hitem{background:var(--d3);border:1px solid rgba(255,255,255,.04);border-radius:var(--rs);padding:12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
-.ha{font-size:13px;font-weight:700;color:var(--text)}
-.ht{font-size:11px;color:var(--text3);margin-top:2px}
-.hi{font-size:10px;padding:2px 6px;background:var(--d4);border-radius:4px;color:var(--text2)}
-
-/* ══════════ BOTTOM NAV ══════════ */
-.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(16,16,20,.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.06);display:flex;z-index:30;padding-bottom:var(--safe-bottom)}
-.bni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 6px;cursor:pointer;color:var(--text3);font-size:10px;font-weight:600;gap:4px;border:none;background:none;font-family:inherit;transition:.2s}
-.bni i{font-size:20px;transition:.2s}
-.bni.active{color:var(--g1)}
-.bni.active i{transform:translateY(-2px);filter:drop-shadow(0 0 5px rgba(245,197,24,.4))}
-
-/* ══════════ PREDICTION POPUP ══════════ */
-.pp{position:fixed;top:70px;right:10px;width:200px;z-index:100;background:rgba(12,12,18,.95);backdrop-filter:blur(16px);
-border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:12px;box-shadow:0 10px 40px rgba(0,0,0,.5);
-display:none;animation:pf 3s ease-in-out infinite;user-select:none}
-.pp.show{display:block}
-@keyframes pf{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-
-.pp-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.05)}
-.pp-tit{font-size:10px;font-weight:800;color:var(--g1);letter-spacing:.5px}
-.pp-cls{background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px}
-.pp-info{font-size:10px;color:var(--text2);text-align:center;margin-bottom:8px;display:flex;justify-content:space-between}
-.pp-sid{font-family:monospace;color:var(--cyan);font-weight:700}
-
-.circles{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:8px}
-.circle{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;border:2px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3);transition:.3s}
-.circle.win{background:rgba(0,212,126,.15);border-color:var(--green);color:var(--green);box-shadow:0 0 15px rgba(0,212,126,.3);transform:scale(1.1)}
-.circle.lose{background:rgba(255,61,61,.15);border-color:var(--red);color:var(--red);box-shadow:0 0 15px rgba(255,61,61,.3)}
-.pp-res{font-size:18px;font-weight:900;text-align:center;height:24px;color:var(--text)}
-.pp-st{display:flex;align-items:center;justify-content:center;gap:6px;font-size:10px;color:var(--text2);margin-top:6px}
-.sdot{width:6px;height:6px;border-radius:50%;background:var(--text3)}
-.sdot.run{background:var(--green);animation:pulse 1s infinite}
-
-/* ══════════ MODALS & TOAST ══════════ */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--d4);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:10px 20px;border-radius:30px;font-size:13px;font-weight:600;z-index:200;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap;box-shadow:0 5px 20px rgba(0,0,0,.4)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.ok{border-color:var(--green);color:var(--green)}
-.toast.err{border-color:var(--red);color:var(--red)}
-
-/* Panel Slide Up */
-.pnl{position:fixed;inset:0;z-index:150;display:none;align-items:flex-end}
-.pnl.open{display:flex}
-.pnl-bg{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
-.pnl-box{background:var(--d2);border-radius:24px 24px 0 0;width:100%;max-height:90vh;overflow-y:auto;position:relative;z-index:1;padding-bottom:var(--safe-bottom);animation:slideUp .3s cubic-bezier(0.16, 1, 0.3, 1)}
-.pnl-hd{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.05);position:sticky;top:0;background:var(--d2);z-index:2}
-.pnl-tit{font-size:18px;font-weight:800;color:var(--g1)}
-.pnl-cls{width:32px;height:32px;border-radius:50%;background:var(--d3);border:none;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
-.pnl-body{padding:20px}
-
-.mlist-item{display:flex;align-items:center;gap:14px;padding:14px;background:var(--d3);border-radius:var(--rs);margin-bottom:10px;border:1px solid rgba(255,255,255,.04);transition:.1s}
-.mlist-item:active{transform:scale(.98);background:var(--d4)}
-.mlist-item i{font-size:18px;width:24px;text-align:center}
-.mlist-item.danger{color:var(--red)}
-.copyright{text-align:center;font-size:11px;color:var(--text3);padding:20px;line-height:1.6}
-.copyright a{color:var(--g1)}
-
+/* MISC */
+.ibox{background:rgba(245,197,24,.04);border:1px solid rgba(245,197,24,.09);border-radius:var(--rs);padding:9px 11px;margin-bottom:11px;font-size:12px;color:var(--t2);line-height:1.75}
+.ibox b{color:var(--g)}
+.cp{text-align:center;font-size:10px;color:var(--t3);padding:14px 14px 4px;line-height:1.6}
+.cp a{color:var(--g);text-decoration:none}
 </style>
 </head>
 <body>
 
-<!-- ══════════ LOADING OVERLAY ══════════ -->
-<div id="loader-overlay">
-  <div class="spinner"></div>
-  <div class="load-txt" id="load-txt">Đang kết nối hệ thống...</div>
-</div>
-
-<!-- ══════════ AUTH SCREEN ══════════ -->
-<div id="sa" class="scr">
+<!-- ═══ AUTH ═══ -->
+<div id="sa" class="s v">
   <div class="acard">
     <div class="brand">
-      <div class="brand-ico"><i class="fas fa-crown"></i></div>
-      <div class="brand-nm">VIP GAME</div>
-      <div class="brand-sl">Hệ thống Dự Đoán AI Tự Động</div>
+      <div class="bico"><i class="fas fa-crown"></i></div>
+      <div class="bnm">VIP GAME</div>
+      <div class="bsl">Tool Dự Đoán AI · Đa Nhà Cái · Tài Xỉu · Sicbo · BCR</div>
     </div>
-    
     <div class="atabs">
-      <button class="atab active" onclick="setAuthMode('login')">Đăng nhập</button>
-      <button class="atab" onclick="setAuthMode('register')">Đăng ký</button>
+      <button class="atab v" onclick="aTab('l')">Đăng nhập</button>
+      <button class="atab" onclick="aTab('r')">Đăng ký</button>
     </div>
-
-    <!-- LOGIN FORM -->
-    <div id="form-login">
-      <div class="fg">
-        <label>Tên đăng nhập</label>
-        <input type="text" id="l-user" placeholder="Nhập username" oninput="this.value=this.value.toLowerCase()">
+    <div id="fl">
+      <div class="fg"><label>Tên đăng nhập</label>
+        <input id="lu" type="text" placeholder="Nhập tên đăng nhập" autocomplete="username" oninput="this.value=this.value.toLowerCase()">
       </div>
-      <div class="fg">
-        <label>Mật khẩu</label>
-        <div class="pww">
-          <input type="password" id="l-pass" placeholder="Nhập mật khẩu" onkeydown="if(event.key==='Enter')Auth.login()">
-          <button class="pweye" onclick="togglePass('l-pass')"><i class="fa fa-eye"></i></button>
+      <div class="fg"><label>Mật khẩu</label>
+        <div class="pw"><input id="lp" type="password" placeholder="Mật khẩu" onkeydown="if(event.key==='Enter')doLogin()">
+          <button class="eye" onclick="tPw('lp',this)"><i class="fa fa-eye"></i></button>
         </div>
       </div>
-      <div class="aerr" id="l-msg"></div>
-      <button class="btn-g" onclick="Auth.login()">ĐĂNG NHẬP NGAY</button>
+      <div class="aerr" id="lerr"></div>
+      <button class="btng" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> ĐĂNG NHẬP</button>
+      <div class="asw">Chưa có tài khoản? <span onclick="aTab('r')">Đăng ký ngay</span></div>
     </div>
-
-    <!-- REGISTER FORM -->
-    <div id="form-register" style="display:none">
-      <div class="fg">
-        <label>Biệt danh</label>
-        <input type="text" id="r-name" placeholder="Tên hiển thị">
+    <div id="fr" style="display:none">
+      <div class="fg"><label>Họ và tên</label><input id="rn" placeholder="Nguyễn Văn A"></div>
+      <div class="fg"><label>Tên đăng nhập</label><input id="ru" placeholder="Tối thiểu 4 ký tự" oninput="this.value=this.value.toLowerCase()"></div>
+      <div class="fg"><label>Mật khẩu</label>
+        <div class="pw"><input id="rp" type="password" placeholder="Tối thiểu 6 ký tự">
+          <button class="eye" onclick="tPw('rp',this)"><i class="fa fa-eye"></i></button>
+        </div>
       </div>
-      <div class="fg">
-        <label>Tên đăng nhập</label>
-        <input type="text" id="r-user" placeholder="Không dấu, 4-12 ký tự" oninput="this.value=this.value.toLowerCase()">
+      <div class="fg"><label>Xác nhận mật khẩu</label>
+        <div class="pw"><input id="rp2" type="password" placeholder="Nhập lại" onkeydown="if(event.key==='Enter')doReg()">
+          <button class="eye" onclick="tPw('rp2',this)"><i class="fa fa-eye"></i></button>
+        </div>
       </div>
-      <div class="fg">
-        <label>Mật khẩu</label>
-        <input type="password" id="r-pass" placeholder="Tối thiểu 6 ký tự">
-      </div>
-      <div class="aerr" id="r-msg"></div>
-      <button class="btn-g" onclick="Auth.register()">TẠO TÀI KHOẢN MỚI</button>
+      <div class="aerr" id="rerr"></div>
+      <button class="btng" onclick="doReg()"><i class="fas fa-user-plus"></i> TẠO TÀI KHOẢN</button>
+      <div class="asw">Đã có tài khoản? <span onclick="aTab('l')">Đăng nhập</span></div>
     </div>
-    
-    <div class="asw" id="auth-switch">Chưa có tài khoản? <span onclick="setAuthMode('register')">Đăng ký ngay</span></div>
   </div>
 </div>
 
-<!-- ══════════ MAIN APP SCREEN ══════════ -->
-<div id="sm" class="scr">
-  <!-- TOP BAR -->
-  <div class="topbar">
+<!-- ═══ MAIN ═══ -->
+<div id="sm" class="s">
+  <div class="tb">
     <div class="tb-l">
-      <div class="tb-logo"><i class="fas fa-crown"></i></div>
-      <span class="tb-title">VIP GAME</span>
+      <div class="tb-ic"><i class="fas fa-crown"></i></div>
+      <span class="tb-nm">VIP GAME</span>
     </div>
     <div class="tb-r">
-      <div class="tb-chip" onclick="UI.toggleMenu()">
-        <div class="tb-av" id="u-avatar">U</div>
-        <span class="tb-uname" id="u-name">User</span>
-        <span class="viptag" id="u-tag" style="display:none">VIP</span>
+      <div class="chip" onclick="opnl('pm')">
+        <div class="av" id="tbav">V</div>
+        <span class="unm" id="tbnm">User</span>
+        <span class="vtag" id="vtag" style="display:none">VIP</span>
       </div>
-      <button class="tb-ibtn" onclick="UI.toggleMenu()"><i class="fas fa-bars"></i></button>
+      <button class="ibtn" onclick="opnl('pm')"><i class="fas fa-bars"></i></button>
     </div>
   </div>
 
-  <!-- BANNER -->
-  <div class="banner">
-    <div class="ban-txt">
-      <h3 id="welcome-txt">Xin chào!</h3>
-      <p id="status-txt">Chưa kích hoạt bản quyền</p>
-    </div>
-    <div class="ks-badge ks-off" id="badge-status">
-      <div class="dot r" id="status-dot"></div>
-      <span id="status-label">FREE</span>
+  <div class="ban">
+    <div><h3 id="banh">Xin chào! 👋</h3><p id="banp">Chào mừng đến VIP GAME</p></div>
+    <div>
+      <div class="kbadge koff" id="kbadge"><div class="dp dpr" id="kdot"></div><span id="ktxt">Chưa kích hoạt</span></div>
+      <div class="kexp" id="kexp" style="display:none"></div>
     </div>
   </div>
 
-  <!-- TABS CONTENT -->
-  <div class="mbody">
-    
-    <!-- TAB HOME -->
-    <div id="tab-home" class="tab-content active">
-      <div class="sec">
-        <div class="sec-title"><i class="fas fa-fire-alt"></i> DANH SÁCH NHÀ CÁI</div>
-        <div class="ggrid" id="game-list">
-          <!-- Game cards rendered by JS -->
+  <!-- HOME -->
+  <div class="mb" id="th">
+    <div class="sec">
+      <div class="st"><i class="fas fa-fire"></i> CHỌN NHÀ CÁI</div>
+      <div class="gg" id="gg"></div>
+    </div>
+    <div class="cp">© 2026 VIP GAME — Premium Gaming Hub<br>Hỗ trợ & mua key: <a href="https://web.telegram.org/k/#@my201901" target="_blank">@my201901</a></div>
+  </div>
+
+  <!-- PAYMENT -->
+  <div class="mb" id="tp" style="display:none">
+    <div class="sec">
+      <div class="st"><i class="fas fa-gem"></i> CHỌN GÓI BẢN QUYỀN</div>
+      <div class="pgrid" id="pgrid"></div>
+      <div class="qrc">
+        <div class="qt"><i class="fas fa-clock"></i> QR hết hạn sau: <span class="qcd" id="qcd">05:00</span></div>
+        <div class="qtop">
+          <div class="qbox"><img id="qri" src="" alt="QR" loading="lazy"></div>
+          <div class="qm">
+            <div class="qr"><span class="ql">Ngân hàng</span><span class="qv">MBBANK</span></div>
+            <div class="qr"><span class="ql">Chủ TK</span><span class="qv">LE CONG HOAN</span></div>
+            <div class="qr"><span class="ql">Số TK</span><span class="qv">02444128888</span></div>
+            <div class="qr"><span class="ql">Số tiền</span><span class="qv gd" id="qamt">--</span></div>
+          </div>
         </div>
+        <div class="txb"><span class="txt" id="txc">----------</span><button class="cpbtn" onclick="cpTxn()"><i class="fas fa-copy"></i> COPY</button></div>
+        <button class="pcta" onclick="cPaid()"><i class="fas fa-check-circle"></i> ĐÃ CHUYỂN KHOẢN</button>
+        <div class="pnote">Admin xác nhận trong 5–15 phút · Giao dịch tự động</div>
       </div>
-      <div class="copyright">
-        © 2026 VIP GAME Tool AI.<br>
-        Tool chỉ phục vụ mục đích giải trí & học tập thuật toán.<br>
-        Hỗ trợ: <a href="https://t.me/my201901" target="_blank">@my201901</a>
+      <div class="sb"><div class="sbi"><i class="fab fa-telegram"></i></div>
+        <div class="sbt"><strong>Hỗ trợ thanh toán</strong><span>Liên hệ nếu gặp sự cố</span></div>
+        <a class="sblink" href="https://web.telegram.org/k/#@my201901" target="_blank"><i class="fab fa-telegram"></i> Chat</a>
       </div>
     </div>
+  </div>
 
-    <!-- TAB PAYMENT -->
-    <div id="tab-pay" class="tab-content">
-      <div class="sec">
-        <div class="sec-title"><i class="fas fa-gem"></i> NẠP VIP TỰ ĐỘNG</div>
-        <p style="font-size:12px;color:var(--text3);margin-bottom:16px">Chọn gói cước và quét mã QR. Hệ thống sẽ tự động kích hoạt sau khi bạn chuyển khoản đúng nội dung.</p>
-        
-        <div class="pgrid" id="plan-list">
-          <!-- Plans rendered by JS -->
+  <!-- KEY -->
+  <div class="mb" id="tk" style="display:none">
+    <div class="sec">
+      <div class="st"><i class="fas fa-key"></i> KÍCH HOẠT KEY</div>
+      <div class="abox">
+        <div style="font-size:13px;font-weight:800;margin-bottom:9px;display:flex;align-items:center;gap:7px"><i class="fas fa-unlock-alt" style="color:var(--g)"></i> Nhập key kích hoạt</div>
+        <div class="arow">
+          <input id="ki" type="text" placeholder="VIP-XXXX-XXXXXXXXXX" maxlength="20" onkeydown="if(event.key==='Enter')actKey()" oninput="this.value=this.value.toUpperCase()">
+          <button class="abtn" onclick="actKey()">KÍCH HOẠT</button>
         </div>
-
-        <div class="qrcard" id="qr-area">
-          <div class="qrtimer">
-            <i class="far fa-clock"></i> Hết hạn sau: 
-            <span class="timer-box" id="qr-timer">05:00</span>
-          </div>
-          
-          <div class="qrtop">
-            <div class="qrbox">
-              <img id="qr-img" src="" alt="QR Code">
-            </div>
-            <div class="qrmeta">
-              <div class="qrrow">
-                <span class="qrl">Ngân hàng</span>
-                <span class="qrv">MBBANK</span>
-              </div>
-              <div class="qrrow">
-                <span class="qrl">Số tài khoản</span>
-                <span class="qrv">02444128888</span>
-              </div>
-              <div class="qrrow">
-                <span class="qrl">Chủ tài khoản</span>
-                <span class="qrv">LE CONG HOAN</span>
-              </div>
-              <div class="qrrow">
-                <span class="qrl">Số tiền</span>
-                <span class="qrv amt" id="pay-amount">0đ</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="txnbox">
-            <span class="txntxt" id="txn-code">WAITING...</span>
-            <button class="copybtn" onclick="Payment.copyCode()"><i class="far fa-copy"></i> COPY</button>
-          </div>
-
-          <button class="paycta" id="btn-confirm" onclick="Payment.verify()">
-            <i class="fas fa-check-circle"></i> TÔI ĐÃ CHUYỂN KHOẢN
-          </button>
-          <div class="paynote">
-            <i class="fas fa-info-circle"></i> Hệ thống tự động kiểm tra trong 5-30 giây.<br>
-            Sai nội dung hoặc thiếu tiền sẽ không được kích hoạt.
-          </div>
-        </div>
+        <div class="kerr" id="ke"></div>
+      </div>
+      <div class="st" style="margin-top:14px"><i class="fas fa-table"></i> BẢNG KEY HỆ THỐNG</div>
+      <div class="kt"><div class="kth"><span>KEY</span><span>GÓI</span><span>CÒN LẠI</span><span>TRẠNG THÁI</span></div><div id="ktb"></div></div>
+      <div class="ibox"><b>📌 Lưu ý:</b> Mỗi key chỉ dùng cho <b>1 tài khoản</b>. Key hết hạn tự khóa.<br><b>💬 Mua key:</b> <a href="https://web.telegram.org/k/#@my201901" target="_blank" style="color:var(--g)">Telegram @my201901</a></div>
+      <div class="sb"><div class="sbi"><i class="fab fa-telegram"></i></div>
+        <div class="sbt"><strong>Mua key & hỗ trợ</strong><span>@my201901</span></div>
+        <a class="sblink" href="https://web.telegram.org/k/#@my201901" target="_blank"><i class="fab fa-telegram"></i> Liên hệ</a>
       </div>
     </div>
+  </div>
 
-    <!-- TAB KEY -->
-    <div id="tab-key" class="tab-content">
-      <div class="sec">
-        <div class="sec-title"><i class="fas fa-key"></i> KÍCH HOẠT KEY</div>
-        <div class="actbox">
-          <div class="act-title">Nhập Code bản quyền</div>
-          <div class="actrow">
-            <input type="text" id="key-input" placeholder="VIP-XXXX-XXXXXX" maxlength="20" oninput="this.value=this.value.toUpperCase()">
-            <button class="actbtn" onclick="KeySys.activate()">ACTIVATE</button>
-          </div>
-          <div class="acterr" id="key-msg"></div>
-        </div>
-
-        <div class="sec-title"><i class="fas fa-history"></i> THÔNG TIN TÀI KHOẢN</div>
-        <div class="ktable">
-          <div class="kth">
-            <span>KEY</span>
-            <span>GÓI</span>
-            <span>CÒN LẠI</span>
-            <span>TRẠNG THÁI</span>
-          </div>
-          <div id="user-key-row">
-            <!-- User key info -->
-          </div>
-        </div>
-      </div>
+  <!-- HISTORY -->
+  <div class="mb" id="thi" style="display:none">
+    <div class="sec">
+      <div class="st"><i class="fas fa-history"></i> LỊCH SỬ HOẠT ĐỘNG</div>
+      <div id="hl"></div>
     </div>
+  </div>
 
-    <!-- TAB HISTORY -->
-    <div id="tab-history" class="tab-content">
-      <div class="sec">
-        <div class="sec-title"><i class="fas fa-list-ul"></i> LỊCH SỬ GIAO DỊCH</div>
-        <div id="history-list">
-          <!-- Items rendered by JS -->
-        </div>
-      </div>
-    </div>
-
-  </div> <!-- End mbody -->
-
-  <!-- BOTTOM NAV -->
   <div class="bnav">
-    <button class="bni active" onclick="UI.switchTab('home')"><i class="fas fa-home"></i> Trang chủ</button>
-    <button class="bni" onclick="UI.switchTab('pay')"><i class="fas fa-gem"></i> Nạp tiền</button>
-    <button class="bni" onclick="UI.switchTab('key')"><i class="fas fa-key"></i> Key</button>
-    <button class="bni" onclick="UI.switchTab('history')"><i class="fas fa-history"></i> Lịch sử</button>
+    <button class="bni v" id="bh" onclick="sTab('h')"><i class="fas fa-home"></i>Trang chủ</button>
+    <button class="bni" id="bp" onclick="sTab('p')"><i class="fas fa-gem"></i>Nạp tiền</button>
+    <button class="bni" id="bk" onclick="sTab('k')"><i class="fas fa-key"></i>Key</button>
+    <button class="bni" id="bhi" onclick="sTab('hi')"><i class="fas fa-history"></i>Lịch sử</button>
   </div>
 </div>
 
-<!-- ══════════ PREDICTION POPUP ══════════ -->
-<div class="pp" id="pred-popup">
-  <div class="pp-hd">
-    <span class="pp-tit">AI LIVE PREDICT</span>
-    <button class="pp-cls" onclick="Tool.stop()"><i class="fas fa-times"></i></button>
-  </div>
-  <div class="pp-info">
-    <span id="pp-casino">---</span>
-    <span class="pp-sid" id="pp-sess">#---</span>
-  </div>
-  <div class="circles">
-    <div class="circle" id="c-tai">TÀI</div>
-    <i class="fas fa-bolt" style="color:rgba(255,255,255,.1)"></i>
-    <div class="circle" id="c-xiu">XỈU</div>
-  </div>
-  <div class="pp-res" id="pp-res">ĐANG KẾT NỐI...</div>
-  <div class="pp-st">
-    <div class="sdot" id="pp-dot"></div>
-    <span id="pp-stxt">Chờ dữ liệu</span>
-  </div>
-</div>
-
-<!-- ══════════ MENU PANEL ══════════ -->
-<div class="pnl" id="menu-panel" onclick="if(event.target===this)UI.toggleMenu()">
-  <div class="pnl-box">
-    <div class="pnl-hd">
-      <span class="pnl-tit">TÀI KHOẢN</span>
-      <button class="pnl-cls" onclick="UI.toggleMenu()"><i class="fas fa-chevron-down"></i></button>
-    </div>
-    <div class="pnl-body">
-      <div class="mlist-item" onclick="UI.switchTab('pay');UI.toggleMenu()">
-        <i class="fas fa-wallet" style="color:var(--green)"></i> Nạp tiền VIP
-      </div>
-      <div class="mlist-item" onclick="UI.switchTab('history');UI.toggleMenu()">
-        <i class="fas fa-history" style="color:var(--cyan)"></i> Lịch sử giao dịch
-      </div>
-      <div class="mlist-item" onclick="window.open('https://t.me/my201901','_blank')">
-        <i class="fab fa-telegram" style="color:#0088cc"></i> Chat hỗ trợ
-      </div>
-      <div class="mlist-item danger" onclick="Auth.logout()">
-        <i class="fas fa-sign-out-alt"></i> Đăng xuất
-      </div>
+<!-- PANEL MENU -->
+<div class="pnl" id="pm"><div class="pbg" onclick="cpnl('pm')"></div>
+  <div class="pbox"><div class="ph"></div>
+    <div class="phd"><span class="ptit">MENU</span><button class="pclose" onclick="cpnl('pm')">✕</button></div>
+    <div class="pb">
+      <div class="mi" onclick="cpnl('pm');sTab('p')"><i class="fas fa-gem" style="color:var(--g)"></i>💎 Nạp tiền</div>
+      <div class="mi" onclick="cpnl('pm');sTab('k')"><i class="fas fa-key" style="color:var(--g)"></i>🔑 Mua Key</div>
+      <div class="mi" onclick="cpnl('pm');sTab('hi')"><i class="fas fa-history" style="color:var(--cy)"></i>📋 Lịch sử</div>
+      <div class="mi" onclick="window.open('https://web.telegram.org/k/#@my201901','_blank');cpnl('pm')"><i class="fab fa-telegram" style="color:#0088cc"></i>📞 Liên hệ Admin</div>
+      <div class="sep"></div>
+      <div class="mi red" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i>📤 Đăng xuất</div>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast">Thông báo</div>
+<!-- PANEL GAME TYPE -->
+<div class="pnl" id="pg"><div class="pbg" onclick="cpnl('pg')"></div>
+  <div class="pbox"><div class="ph"></div>
+    <div class="phd"><span class="ptit" id="gpt">Chọn loại game</span><button class="pclose" onclick="cpnl('pg')">✕</button></div>
+    <div class="pb" id="gpb"></div>
+  </div>
+</div>
+
+<!-- PRED POPUP -->
+<div class="pp" id="pp">
+  <div class="ppin">
+    <div class="ppdrag" id="ppd">
+      <div class="pphd"><i class="fas fa-broadcast-tower"></i> LIVE PREDICT</div>
+      <button class="ppcl" onclick="clPP()">✕</button>
+    </div>
+    <div class="ppcn">Nhà cái: <b id="ppcn">---</b></div>
+    <div class="pps"><span class="ppsl">Phiên</span><span class="ppsi" id="ppss">---</span></div>
+    <div class="circles">
+      <div class="ci cit" id="cT">TÀI</div>
+      <i class="fas fa-bolt" style="color:rgba(255,255,255,.1);font-size:12px"></i>
+      <div class="ci cix" id="cX">XỈU</div>
+    </div>
+    <div class="ppres">
+      <div class="pppt" id="pppt"><span style="color:rgba(255,255,255,.18)">Chờ...</span></div>
+      <div class="ppcf" id="ppcf"></div>
+    </div>
+    <div class="ppst"><div class="sd sdr" id="ppd2"></div><span class="stx" id="ppstx">Chưa chạy</span></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-/* ═════════════════════════════════════════════════
-   CONFIG LOADING FROM GITHUB
-══════════════════════════════════════════════════ */
-const CONFIG_URL = "https://raw.githubusercontent.com/lch04122009-rgb/toolvip/main/config.json";
+const TG="https://web.telegram.org/k/#@my201901";
+const CASINOS=[
+  {id:"sunwin", nm:"Sunwin",    sc:98,hot:1,logo:"/static/logo_sunwin.png",
+   g:{"Tài Xỉu":"https://era-technology-particular-domestic.trycloudflare.com/api/tx","Sicbo":"https://enquiries-indices-navigator-mega.trycloudflare.com/api/sunsicbo","Sun Phụng":"https://ntsc-fly-questionnaire-divx.trycloudflare.com/api/sunphung"}},
+  {id:"789club",nm:"789Club",   sc:92,hot:0,logo:"/static/logo_789club.png",
+   g:{"Tài Xỉu":"https://venue-integrate-aged-heavily.trycloudflare.com/api/tx"}},
+  {id:"hitclub",nm:"Hitclub",   sc:96,hot:1,logo:"/static/logo_hitclub.png",
+   g:{"Tài Xỉu":"https://preference-assuming-picnic-concentration.trycloudflare.com/api/tx","TX MD5":"https://preference-assuming-picnic-concentration.trycloudflare.com/api/txmd5"}},
+  {id:"b52",    nm:"B52",       sc:89,hot:0,logo:"/static/logo_b52.png",
+   g:{"TX MD5":"https://flex-knights-agree-grass.trycloudflare.com/txmd5"}},
+  {id:"sa0789", nm:"SA0789",    sc:91,hot:0,logo:"/static/logo_sa0789.png",
+   g:{"Tài Xỉu":"https://with-boating-signed-turn.trycloudflare.com/api/tx"}},
+  {id:"xocdia", nm:"Xóc Đĩa",  sc:94,hot:1,logo:"/static/logo_xocdia.png",
+   g:{"Xóc Đĩa MD5":"https://strategy-cube-vinyl-warcraft.trycloudflare.com/api/xocdia"}},
+  {id:"68gb",   nm:"68GB",      sc:88,hot:0,logo:"/static/logo_68gb.png",
+   g:{"Thường":"https://description-zen-dog-films.trycloudflare.com/api/68/thuong","MD5":"https://profiles-televisions-sic-stay.trycloudflare.com/api/68/md5"}},
+  {id:"baccarat",nm:"Baccarat", sc:91,hot:0,logo:"/static/logo_baccarat.png",
+   g:{"BCR":"https://employers-hormone-land-idaho.trycloudflare.com/api/bcr"}},
+  {id:"betvip", nm:"BetVip",    sc:97,hot:1,logo:"/static/logo_betvip.png",
+   g:{"Tài Xỉu":"https://eve-hydrocodone-offshore-eagle.trycloudflare.com/api/tx","TX MD5":"https://eve-hydrocodone-offshore-eagle.trycloudflare.com/api/txmd5"}},
+  {id:"lc79",   nm:"Lẩu Cua 79",sc:93,hot:0,logo:"/static/logo_lc79.png",
+   g:{"Tài Xỉu":"https://strategy-cube-vinyl-warcraft.trycloudflare.com/api/tx","TX MD5":"https://strategy-cube-vinyl-warcraft.trycloudflare.com/api/txmd5"}},
+  {id:"luck8",  nm:"Luck8",     sc:92,hot:0,logo:"/static/logo_luck8.png",
+   g:{"TX MD5":"https://qld-incentives-tion-boost.trycloudflare.com/api/txmd5","Sicbo 40s":"https://qld-incentives-tion-boost.trycloudflare.com/api/sicbo40"}},
+  {id:"sumclub",nm:"Sum Club",  sc:90,hot:0,logo:"/static/logo_sumclub.png",
+   g:{"TX MD5":"https://cricket-compressed-list-suppose.trycloudflare.com/api/md5"}},
+  {id:"max789", nm:"Max789",    sc:91,hot:0,logo:"/static/logo_max789.png",
+   g:{"TX MD5":"https://deutschland-mandatory-upon-changelog.trycloudflare.com/api/tx"}},
+  {id:"aviator",nm:"Aviator",   sc:99,hot:1,logo:"/static/logo_aviator.png",
+   g:{"Aviator":"https://preference-assuming-picnic-concentration.trycloudflare.com/api/tx"}},
+  {id:"son789", nm:"Son789",    sc:89,hot:0,logo:"/static/logo_son789.png",
+   g:{"Tài Xỉu":"https://with-boating-signed-turn.trycloudflare.com/api/tx"}},
+];
+const PLANS=[
+  {id:"1d",l:"KEY 1 NGÀY",  p:35000, d:1, hot:0},
+  {id:"3d",l:"KEY 3 NGÀY",  p:60000, d:3, hot:1},
+  {id:"7d",l:"KEY 7 NGÀY",  p:95000, d:7, hot:0},
+  {id:"1m",l:"KEY 1 THÁNG", p:175000,d:30,hot:1},
+  {id:"2m",l:"KEY 2 THÁNG", p:220000,d:60,hot:0},
+  {id:"3m",l:"KEY 3 THÁNG", p:270000,d:90,hot:0},
+];
+const $=id=>document.getElementById(id);
+let CUR=null,SP=PLANS[1],TX="",QT=null,QS=300,FIV=null,CS=null,CURL=null,RUN=false;
 
-// Default Config (Fallback if GitHub fails)
-const DEFAULT_CONFIG = {
-  games: [
-    {id:"sunwin", name:"Sunwin", emoji:"🎰", score:98, hot:true, api:"https://era-technology-particular-domestic.trycloudflare.com/api/tx"},
-    {id:"789", name:"789Club", emoji:"🎯", score:92, hot:false, api:"https://venue-integrate-aged-heavily.trycloudflare.com/api/tx"},
-    {id:"hit", name:"Hitclub", emoji:"🃏", score:95, hot:true, api:"https://preference-assuming-picnic-concentration.trycloudflare.com/api/tx"},
-    {id:"b52", name:"B52", emoji:"🚀", score:88, hot:false, api:"https://flex-knights-agree-grass.trycloudflare.com/txmd5"},
-    {id:"son789", name:"Son789", emoji:"⭐", score:89, hot:false, api:"https://with-boating-signed-turn.trycloudflare.com/api/tx"},
-    {id:"max789", name:"Max789", emoji:"👑", score:90, hot:false, api:"https://deutschland-mandatory-upon-changelog.trycloudflare.com/api/tx"},
-    {id:"68gb", name:"68GB", emoji:"🎮", score:87, hot:false, api:"https://description-zen-dog-films.trycloudflare.com/api/68/thuong"},
-    {id:"lc79", name:"Lẩu Cua 79", emoji:"🦀", score:91, hot:false, api:"https://strategy-cube-vinyl-warcraft.trycloudflare.com/api/tx"},
-    {id:"luck8", name:"Luck8", emoji:"🍀", score:93, hot:false, api:"https://qld-incentives-tion-boost.trycloudflare.com/api/txmd5"}
-  ],
-  plans: [
-    {id:"d1", label:"1 NGÀY", price:35000, days:1},
-    {id:"d3", label:"3 NGÀY", price:60000, days:3, hot:true},
-    {id:"d7", label:"7 NGÀY", price:95000, days:7},
-    {id:"m1", label:"1 THÁNG", price:175000, days:30, hot:true}
-  ]
-};
+function fv(n){return new Intl.NumberFormat("vi-VN").format(n)+"đ"}
+function tPw(id,b){const i=$(id);i.type=i.type==="password"?"text":"password";b.innerHTML=i.type==="password"?'<i class="fa fa-eye"></i>':'<i class="fa fa-eye-slash"></i>'}
+let tTm;
+function toast(m,t=""){const el=$("toast");el.textContent=m;el.className="toast "+(t||"");void el.offsetWidth;el.classList.add("v");clearTimeout(tTm);tTm=setTimeout(()=>el.classList.remove("v"),2500)}
+async function api(p,m="GET",b=null){const o={method:m,headers:{"Content-Type":"application/json"},credentials:"include"};if(b)o.body=JSON.stringify(b);return(await fetch(p,o)).json()}
 
-let APP_CONFIG = { ...DEFAULT_CONFIG }; // Start with defaults
+// AUTH
+function aTab(t){document.querySelectorAll(".atab").forEach((b,i)=>b.classList.toggle("v",t==="l"?!i:!!i));$("fl").style.display=t==="l"?"block":"none";$("fr").style.display=t==="r"?"block":"none";$("lerr").textContent="";$("rerr").textContent=""}
+async function doLogin(){
+  const u=$("lu").value.trim(),p=$("lp").value;$("lerr").textContent="";
+  if(!u||!p){$("lerr").textContent="Vui lòng nhập đầy đủ.";return}
+  const r=await api("/api/login","POST",{username:u,password:p});
+  r.ok?((CUR=r.user),enterMain()):$("lerr").textContent=r.msg
+}
+async function doReg(){
+  const n=$("rn").value.trim(),u=$("ru").value.trim(),p=$("rp").value,p2=$("rp2").value;$("rerr").textContent="";
+  if(!n||!u||!p||!p2){$("rerr").textContent="Vui lòng điền đầy đủ.";return}
+  if(p!==p2){$("rerr").textContent="Mật khẩu không khớp.";return}
+  const r=await api("/api/register","POST",{name:n,username:u,password:p});
+  if(r.ok){const r2=await api("/api/login","POST",{username:u,password:p});r2.ok&&((CUR=r2.user),enterMain())}
+  else $("rerr").textContent=r.msg
+}
+async function doLogout(){stopTool();await api("/api/logout","POST");CUR=null;$("sa").classList.add("v");$("sm").classList.remove("v");$("sm").style.display="none";cpnl("pm");aTab("l")}
 
-async function loadConfigFromGitHub() {
-  try {
-    console.log("Fetching config from:", CONFIG_URL);
-    const response = await fetch(CONFIG_URL);
-    if (!response.ok) throw new Error("HTTP Error " + response.status);
-    
-    const data = await response.json();
-    
-    // Merge: Prioritize GitHub data, keep defaults if keys missing
-    APP_CONFIG = {
-      games: Array.isArray(data.games) ? data.games : DEFAULT_CONFIG.games,
-      plans: Array.isArray(data.plans) ? data.plans : DEFAULT_CONFIG.plans
-    };
-    
-    console.log("Config loaded successfully from GitHub.");
-  } catch (error) {
-    console.warn("Failed to load config from GitHub. Using fallback defaults.", error);
-    // APP_CONFIG remains DEFAULT_CONFIG
-  } finally {
-    // Hide loader
-    const loader = document.getElementById('loader-overlay');
-    if(loader) {
-      loader.style.opacity = '0';
-      setTimeout(() => loader.remove(), 500);
-    }
-    // Start App
-    Auth.init();
-  }
+// MAIN
+function enterMain(){
+  const nm=CUR.name||CUR.username,ini=nm.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+  $("tbav").textContent=ini;$("tbnm").textContent=nm.split(" ").pop();
+  const h=new Date().getHours(),gr=h<6?"Đêm khuya":h<12?"Buổi sáng":h<18?"Buổi chiều":"Buổi tối";
+  $("banh").textContent=gr+" "+nm.split(" ").pop()+" 👋";
+  updKey();buildGG();buildPG();buildKT();loadHist();genTxn();startQR();
+  $("sa").classList.remove("v");$("sm").classList.add("v");$("sm").style.display="flex"
+}
+function updKey(){
+  const a=CUR.key_active,r=CUR.remain_days||0;
+  $("kbadge").className="kbadge "+(a?"kon":"koff");
+  $("kdot").className="dp "+(a?"dpg":"dpr");
+  $("ktxt").textContent=a?"Đang hoạt động":"Chưa kích hoạt";
+  $("vtag").style.display=a?"":"none";
+  if(a){$("kexp").style.display="block";$("kexp").textContent="⏱ Còn "+r+" ngày · "+CUR.key_plan;$("banp").textContent="Key còn "+r+" ngày · "+CUR.key_plan}
+  else{$("kexp").style.display="none";$("banp").textContent="Kích hoạt key để dùng tool dự đoán"}
 }
 
-/* ═════════════════════════════════════════════════
-   DATABASE SIMULATION (LOCALSTORAGE BACKEND)
-══════════════════════════════════════════════════ */
-const DB = {
-  getUsers: () => JSON.parse(localStorage.getItem('vip_users') || '{}'),
-  saveUsers: (data) => localStorage.setItem('vip_users', JSON.stringify(data)),
-  
-  getSession: () => JSON.parse(localStorage.getItem('vip_session')),
-  setSession: (user) => localStorage.setItem('vip_session', JSON.stringify(user)),
-  clearSession: () => localStorage.removeItem('vip_session'),
-
-  register: (name, user, pass) => {
-    const users = DB.getUsers();
-    if(users[user]) return {ok:false, msg:"Tên đăng nhập đã tồn tại!"};
-    if(pass.length < 6) return {ok:false, msg:"Mật khẩu tối thiểu 6 ký tự"};
-    
-    users[user] = {
-      name, user, pass, 
-      key: null, expiry: 0, 
-      history: [],
-      created: Date.now()
-    };
-    DB.saveUsers(users);
-    return {ok:true, msg:"Đăng ký thành công!"};
-  },
-
-  login: (user, pass) => {
-    const users = DB.getUsers();
-    if(!users[user] || users[user].pass !== pass) return {ok:false, msg:"Sai tài khoản hoặc mật khẩu"};
-    DB.setSession(users[user]);
-    return {ok:true, user: users[user]};
-  },
-
-  updateUser: (username, newData) => {
-    const users = DB.getUsers();
-    if(users[username]){
-      users[username] = {...users[username], ...newData};
-      DB.saveUsers(users);
-      const sess = DB.getSession();
-      if(sess && sess.user === username) DB.setSession(users[username]);
-    }
-  }
-};
-
-/* ═════════════════════════════════════════════════
-   AUTHENTICATION CONTROLLER
-══════════════════════════════════════════════════ */
-const Auth = {
-  init: () => {
-    const sess = DB.getSession();
-    if(sess){
-      UI.enterMain(sess);
-    } else {
-      UI.showAuth();
-    }
-  },
-  login: () => {
-    const u = $('l-user').value.trim();
-    const p = $('l-pass').value;
-    const res = DB.login(u, p);
-    if(res.ok) UI.enterMain(res.user);
-    else UI.toast(res.msg, 'err');
-  },
-  register: () => {
-    const n = $('r-name').value.trim();
-    const u = $('r-user').value.trim();
-    const p = $('r-pass').value;
-    if(!n||!u||!p) return UI.toast('Vui lòng nhập đầy đủ', 'err');
-    const res = DB.register(n, u, p);
-    if(res.ok) {
-      UI.toast(res.msg, 'ok');
-      setAuthMode('login');
-      $('l-user').value = u;
-    } else {
-      UI.toast(res.msg, 'err');
-    }
-  },
-  logout: () => {
-    Tool.stop();
-    DB.clearSession();
-    location.reload();
-  }
-};
-
-/* ═════════════════════════════════════════════════
-   PAYMENT SYSTEM (SIMULATION)
-══════════════════════════════════════════════════ */
-const Payment = {
-  plan: null, // Will be set from APP_CONFIG
-  timer: null,
-  seconds: 300,
-  txnCode: '',
-
-  init: () => {
-    // Use first plan or default to 2nd plan if available
-    const plans = APP_CONFIG.plans || [];
-    Payment.plan = plans.length > 1 ? plans[1] : (plans[0] || null);
-    Payment.renderPlans();
-    if(Payment.plan) Payment.generateQR();
-  },
-
-  renderPlans: () => {
-    const plans = APP_CONFIG.plans || [];
-    const defaultIdx = plans.length > 1 ? 1 : 0;
-    
-    $('plan-list').innerHTML = plans.map((p, idx) => `
-      <div class="pcard ${idx===defaultIdx?'selected':''}" onclick="Payment.selectPlan(${idx})">
-        ${p.hot?'<div class="phot">HOT</div>':''}
-        <div class="pdays">${p.label}</div>
-        <div class="pprice">${p.price.toLocaleString()}<sub>đ</sub></div>
-        <div class="pdur">${p.days} ngày sử dụng</div>
+// GAME GRID
+function buildGG(){
+  $("gg").innerHTML=CASINOS.map(c=>`
+    <div class="gc${CUR.key_active?" ":"" }" id="gc-${c.id}" onclick="onCard('${c.id}')">
+      <div class="gc-img">
+        <img src="${c.logo}" alt="${c.nm}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
+        <div style="display:none;font-size:36px;width:100%;height:100%;align-items:center;justify-content:center;background:#0d0d14">🎮</div>
+        <div class="gc-sc">🔥 AI ${c.sc}%</div>
+        ${c.hot?'<div class="gc-hot">HOT</div>':''}
       </div>
-    `).join('');
-  },
-
-  selectPlan: (idx) => {
-    const plans = APP_CONFIG.plans || [];
-    if(!plans[idx]) return;
-    Payment.plan = plans[idx];
-    document.querySelectorAll('.pcard').forEach((el, i) => el.classList.toggle('selected', i===idx));
-    Payment.generateQR();
-  },
-
-  generateQR: () => {
-    if(!Payment.plan) return;
-    Payment.txnCode = "VIP" + Math.floor(Math.random()*1000000);
-    $('txn-code').innerText = Payment.txnCode;
-    $('pay-amount').innerText = Payment.plan.price.toLocaleString() + "đ";
-    
-    const content = `${Payment.txnCode} VIPGAME UPGRADE`;
-    const bankAcc = "02444128888";
-    const bankName = "MBBANK";
-    const amount = Payment.plan.price;
-    
-    const url = `https://img.vietqr.io/image/${bankName}-${bankAcc}-compact2.png?amount=${amount}&addInfo=${content}&accountName=LE%20CONG%20HOAN`;
-    $('qr-img').src = url;
-
-    Payment.startTimer();
-  },
-
-  startTimer: () => {
-    if(Payment.timer) clearInterval(Payment.timer);
-    Payment.seconds = 300;
-    Payment.updateTimerUI();
-    Payment.timer = setInterval(() => {
-      Payment.seconds--;
-      Payment.updateTimerUI();
-      if(Payment.seconds <= 0) Payment.generateQR(); // Refresh QR
-    }, 1000);
-  },
-
-  updateTimerUI: () => {
-    const m = Math.floor(Payment.seconds/60).toString().padStart(2,'0');
-    const s = (Payment.seconds%60).toString().padStart(2,'0');
-    const el = $('qr-timer');
-    if(!el) return;
-    el.innerText = `${m}:${s}`;
-    if(Payment.seconds < 60) el.classList.add('warn');
-    else el.classList.remove('warn');
-  },
-
-  copyCode: () => {
-    navigator.clipboard.writeText(Payment.txnCode);
-    UI.toast('Đã copy nội dung CK', 'ok');
-  },
-
-  verify: () => {
-    const btn = $('btn-confirm');
-    const area = $('qr-area');
-    
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ĐANG ĐỐI SOÁT...';
-    area.classList.add('loading');
-
-    // Giả lập gọi API Server để check (Delay 3s)
-    setTimeout(() => {
-      area.classList.remove('loading');
-      
-      // LOGIC GIẢ LẬP: Luôn thành công để Dev test flow
-      const success = true; 
-
-      if(success) {
-        const user = DB.getSession();
-        const now = Date.now();
-        let newExpiry = user.expiry > now ? user.expiry : now;
-        newExpiry += (Payment.plan.days * 24 * 60 * 60 * 1000);
-
-        const keyGen = `VIP-${Math.random().toString(36).substr(2,6).toUpperCase()}-${Date.now().toString().slice(-4)}`;
-
-        DB.updateUser(user.user, {
-          key: keyGen,
-          expiry: newExpiry
-        });
-
-        const historyItem = {
-          action: `Nạp ${Payment.plan.label}`,
-          time: new Date().toLocaleString('vi-VN'),
-          val: `+${Payment.plan.days} ngày`
-        };
-        const hist = user.history || [];
-        hist.unshift(historyItem);
-        DB.updateUser(user.user, {history: hist});
-
-        UI.toast('🎉 Thanh toán thành công! VIP đã kích hoạt.', 'ok');
-        UI.enterMain(DB.getSession()); 
-        UI.switchTab('key');
-      } else {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check-circle"></i> TÔI ĐÃ CHUYỂN KHOẢN';
-        UI.toast('Không tìm thấy giao dịch nào.', 'err');
-      }
-    }, 3000);
-  }
-};
-
-/* ═════════════════════════════════════════════════
-   KEY SYSTEM
-══════════════════════════════════════════════════ */
-const KeySys = {
-  activate: () => {
-    const input = $('key-input').value.trim();
-    const msg = $('key-msg');
-    
-    if(!input) { msg.innerText = "Vui lòng nhập key"; msg.className = "acterr bad"; return; }
-
-    if(input.includes("VIP") || input.length > 5) {
-      const user = DB.getSession();
-      const now = Date.now();
-      let expiry = user.expiry > now ? user.expiry : now;
-      expiry += (7 * 24 * 60 * 60 * 1000);
-      
-      DB.updateUser(user.user, { key: input, expiry: expiry });
-      msg.innerText = "Kích hoạt thành công!";
-      msg.className = "acterr ok";
-      UI.toast("Kích hoạt Key thành công!", "ok");
-      setTimeout(() => UI.enterMain(DB.getSession()), 1000);
-    } else {
-      msg.innerText = "Key không hợp lệ";
-      msg.className = "acterr bad";
-    }
-  },
-  renderKeyRow: (user) => {
-    const now = Date.now();
-    const isActive = user.expiry > now;
-    const diff = Math.ceil((user.expiry - now) / (1000 * 60 * 60 * 24));
-    
-    $('user-key-row').innerHTML = `
-      <div class="kkey">${user.key || '---'}</div>
-      <div class="kplan">${isActive ? 'PREMIUM' : 'FREE'}</div>
-      <div class="krem ${isActive ? 'on' : 'ex'}">${isActive ? diff + ' ngày' : 'Hết hạn'}</div>
-      <div><span class="kst ${isActive ? 'vip' : 'exp'}">${isActive ? 'Hoạt động' : 'Khóa'}</span></div>
-    `;
-  }
-};
-
-/* ═════════════════════════════════════════════════
-   TOOL LOGIC (PREDICTION)
-══════════════════════════════════════════════════ */
-const Tool = {
-  interval: null,
-  isRunning: false,
-
-  start: (id, name) => {
-    const user = DB.getSession();
-    const now = Date.now();
-    if(user.expiry < now) {
-      UI.toast('🔒 Tài khoản chưa kích hoạt VIP!', 'err');
-      UI.switchTab('pay');
-      return;
-    }
-
-    Tool.stop();
-    Tool.isRunning = true;
-    
-    $('pp-casino').innerText = name;
-    $('pred-popup').classList.add('show');
-    $('pp-res').innerText = "ĐANG TẢI DỮ LIỆU...";
-    $('c-tai').className = 'circle';
-    $('c-xiu').className = 'circle';
-    $('pp-dot').className = 'sdot run';
-    $('pp-stxt').innerText = "Đang phân tích";
-
-    document.querySelectorAll('.gcard').forEach(c => c.classList.remove('running'));
-    const activeCard = document.getElementById('card-'+id);
-    if(activeCard) activeCard.classList.add('running');
-
-    // Find API from config
-    const game = APP_CONFIG.games.find(g => g.id === id);
-    const apiUrl = game ? game.api : null;
-
-    Tool.fetchLoop(name, apiUrl);
-    Tool.interval = setInterval(() => Tool.fetchLoop(name, apiUrl), 2000);
-  },
-
-  stop: () => {
-    Tool.isRunning = false;
-    clearInterval(Tool.interval);
-    $('pred-popup').classList.remove('show');
-    document.querySelectorAll('.gcard').forEach(c => c.classList.remove('running'));
-  },
-
-  fetchLoop: (name, apiUrl) => {
-    // Nếu có API thật thì fetch, nếu không hoặc fail thì dùng giả lập
-    if(apiUrl) {
-      fetch(apiUrl+"?t="+Date.now())
-        .then(r=>r.json())
-        .then(d=> {
-           // Parse logic từ API thật ở đây
-           // Ví dụ đơn giản:
-           const sid = d.phien || d.session || Date.now().toString().slice(-4);
-           const pred = d.du_doan || d.predict;
-           Tool.updateUI(sid, pred);
-        })
-        .catch(() => {
-           // Fallback simulation nếu API lỗi
-           Tool.simulate();
-        });
-    } else {
-      Tool.simulate();
-    }
-  },
-
-  simulate: () => {
-    const r = Math.random();
-    if(r > 0.3) {
-      const isTai = Math.random() > 0.5;
-      const sess = Math.floor(Math.random() * 90000) + 10000;
-      Tool.updateUI(sess, isTai ? "TÀI" : "XỈU");
-    } else {
-      $('pp-res').innerText = "ĐANG TÍNH TOÁN...";
-      $('pp-stxt').innerText = "Đang quét cầu...";
-    }
-  },
-
-  updateUI: (sess, pred) => {
-    $('pp-sess').innerText = "#" + sess;
-    const isTai = /tài|tai|over/i.test(String(pred));
-    const isXiu = /xỉu|xiu|under/i.test(String(pred));
-    
-    if(isTai) {
-      $('pp-res').innerHTML = '<span style="color:var(--green)">TÀI ▲</span>';
-      $('c-tai').className = 'circle win';
-      $('c-xiu').className = 'circle';
-    } else if(isXiu) {
-      $('pp-res').innerHTML = '<span style="color:var(--red)">XỈU ▼</span>';
-      $('c-tai').className = 'circle';
-      $('c-xiu').className = 'circle win';
-    } else {
-      $('pp-res').innerHTML = pred;
-    }
-    $('pp-stxt').innerText = "Đã chốt tín hiệu";
-    $('pp-dot').className = 'sdot';
-  }
-};
-
-/* ═════════════════════════════════════════════════
-   UI CONTROLLER
-══════════════════════════════════════════════════ */
-const UI = {
-  showAuth: () => {
-    $('sa').classList.add('active');
-    $('sm').classList.remove('active');
-  },
-  
-  enterMain: (user) => {
-    $('sa').classList.remove('active');
-    $('sm').classList.add('active');
-    
-    $('u-name').innerText = user.name;
-    $('u-avatar').innerText = user.name[0].toUpperCase();
-    $('welcome-txt').innerText = `Chào ${user.name} 👋`;
-    
-    const now = Date.now();
-    const isVip = user.expiry > now;
-    
-    if(isVip) {
-      const days = Math.ceil((user.expiry - now) / (86400000));
-      $('status-txt').innerText = `Còn ${days} ngày VIP`;
-      $('badge-status').className = 'ks-badge ks-on';
-      $('status-dot').className = 'dot g';
-      $('status-label').innerText = 'VIP PRO';
-      $('u-tag').style.display = 'inline-block';
-    } else {
-      $('status-txt').innerText = 'Vui lòng nạp tiền để sử dụng';
-      $('badge-status').className = 'ks-badge ks-off';
-      $('status-dot').className = 'dot r';
-      $('status-label').innerText = 'FREE';
-      $('u-tag').style.display = 'none';
-    }
-
-    // Render Games from APP_CONFIG
-    const games = APP_CONFIG.games || [];
-    $('game-list').innerHTML = games.map(g => `
-      <div class="gcard" id="card-${g.id}" onclick="Tool.start('${g.id}', '${g.name}')">
-        <div class="gc-thumb">
-          <div class="gc-emoji">${g.emoji}</div>
-          <div class="gc-score">AI ${g.score}%</div>
-          ${g.hot?'<div class="gc-hot">HOT</div>':''}
-        </div>
-        <div class="gc-body">
-          <div class="gc-name">${g.name}</div>
-          <div class="gc-ai"><i class="fas fa-robot"></i> Tỉ lệ thắng cao</div>
-          <button class="gc-btn ${isVip?'vip':''}">${isVip?'BẮT ĐẦU':'🔒 KHÓA'}</button>
-        </div>
+      <div class="gc-body">
+        <div class="gc-nm">${c.nm}</div>
+        <div class="gc-ai">🔥 AI Score ${c.sc}%</div>
+        <button class="gcbtn${CUR.key_active?"":" lk"}">${CUR.key_active?"⚡ KÍCH HOẠT":"🔒 MUA KEY"}</button>
       </div>
-    `).join('');
-
-    KeySys.renderKeyRow(user);
-
-    const hist = user.history || [];
-    $('history-list').innerHTML = hist.length ? hist.map(h => `
-      <div class="hitem">
-        <div>
-          <div class="ha">${h.action}</div>
-          <div class="ht">${h.time}</div>
-        </div>
-        <div class="hi">${h.val}</div>
-      </div>
-    `).join('') : '<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Chưa có lịch sử giao dịch</div>';
-  },
-
-  switchTab: (id) => {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.bni').forEach(el => el.classList.remove('active'));
-    
-    $('tab-'+id).classList.add('active');
-    const map = {'home':0, 'pay':1, 'key':2, 'history':3};
-    document.querySelectorAll('.bni')[map[id]].classList.add('active');
-
-    if(id === 'pay') Payment.init();
-  },
-
-  toggleMenu: () => {
-    const p = $('menu-panel');
-    if(p.style.display === 'flex') {
-      p.style.display = 'none';
-      p.classList.remove('open');
-    } else {
-      p.style.display = 'flex';
-      setTimeout(()=>p.classList.add('open'), 10);
-    }
-  },
-
-  toast: (msg, type='') => {
-    const t = $('toast');
-    t.innerText = msg;
-    t.className = 'toast show '+type;
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
-};
-
-/* ═════════════════════════════════════════════════
-   HELPERS
-══════════════════════════════════════════════════ */
-const $ = id => document.getElementById(id);
-function setAuthMode(mode) {
-  const tabs = document.querySelectorAll('.atab');
-  const forms = [$('#form-login'), $('#form-register')];
-  const switchTxt = $('#auth-switch');
-  
-  if(mode === 'login') {
-    tabs[0].classList.add('active'); tabs[1].classList.remove('active');
-    forms[0].style.display = 'block'; forms[1].style.display = 'none';
-    switchTxt.innerHTML = 'Chưa có tài khoản? <span onclick="setAuthMode(\'register\')">Đăng ký ngay</span>';
-  } else {
-    tabs[0].classList.remove('active'); tabs[1].classList.add('active');
-    forms[0].style.display = 'none'; forms[1].style.display = 'block';
-    switchTxt.innerHTML = 'Đã có tài khoản? <span onclick="setAuthMode(\'login\')">Đăng nhập</span>';
-  }
+    </div>`).join("")
 }
-function togglePass(id) {
-  const el = $(id);
-  el.type = el.type === 'password' ? 'text' : 'password';
+function onCard(id){
+  if(!CUR.key_active){toast("🔒 Cần kích hoạt key!","er");setTimeout(()=>sTab('k'),700);return}
+  const c=CASINOS.find(x=>x.id===id),gs=Object.keys(c.g);
+  if(gs.length===1){startTool(c,gs[0]);return}
+  $("gpt").textContent=c.nm+" — Chọn loại game";
+  $("gpb").innerHTML=gs.map(g=>`<div class="mi" onclick="cpnl('pg');startTool(CASINOS.find(x=>x.id==='${id}'),'${g}')"><i class="fas fa-play-circle" style="color:var(--g)"></i>${g}</div>`).join("");
+  opnl("pg")
+}
+function startTool(c,gn){
+  stopTool();CS=c;CURL=c.g[gn];RUN=true;
+  document.querySelectorAll(".gc").forEach(x=>x.classList.remove("sel"));
+  const el=$("gc-"+c.id);el&&el.classList.add("sel");
+  $("ppcn").textContent=c.nm+" · "+gn;
+  $("pp").classList.add("v");CS=null;$("ppss").textContent="---";
+  $("cT").className="ci cit";$("cX").className="ci cix";
+  $("pppt").innerHTML='<span style="color:rgba(255,255,255,.16)">Đang tải...</span>';
+  $("ppcf").innerHTML="";setDot("y","Đang kết nối...");
+  CS=c;fetchD();FIV=setInterval(fetchD,2000);toast("▶ "+c.nm+" · "+gn,"gd")
+}
+function stopTool(){RUN=false;if(FIV){clearInterval(FIV);FIV=null}$("cT").className="ci cit";$("cX").className="ci cix";setDot("r","Đã dừng");document.querySelectorAll(".gc").forEach(x=>x.classList.remove("sel"))}
+function clPP(){stopTool();$("pp").classList.remove("v")}
+
+// FETCH
+function fetchD(){
+  if(!RUN||!CURL)return;
+  fetch(CURL+"?_="+Date.now()).then(r=>r.json()).then(parseR).catch(()=>setDot("y","Đang kết nối..."))
+}
+function parseR(j){
+  const d=j.data||j,sid=d.phien_du_doan||d.phien||d.session||d.id||(Array.isArray(j)?j[0]?.phien:null),
+        pred=d.du_doan_phien_tiep||d.du_doan||d.predict||d.ket_qua||d.result||(Array.isArray(j)?j[0]?.ket_qua:null),
+        conf=d.do_tin_cay||d.confidence;
+  if(!sid&&!pred)return;
+  if(sid&&String(sid)!==String(CS)){CS=String(sid);updPred(sid,pred,conf);setDot("g","Live ●")}
+}
+function updPred(s,p,c){
+  $("ppss").textContent="#"+s;$("cT").className="ci cit";$("cX").className="ci cix";
+  const tai=p&&/tài|tai|over|^t$|banker/i.test(String(p)),xiu=p&&/xỉu|xiu|under|^x$|player/i.test(String(p));
+  if(tai){$("cT").className="ci cit at";$("pppt").innerHTML='<span style="color:var(--grn);font-size:21px">TÀI ▲</span>'}
+  else if(xiu){$("cX").className="ci cix ax";$("pppt").innerHTML='<span style="color:var(--red);font-size:21px">XỈU ▼</span>'}
+  else if(p){$("pppt").innerHTML='<span style="color:var(--g)">'+p+'</span>'}
+  $("ppcf").innerHTML=c?'Độ tin cậy: <b>'+c+'</b>':''
+}
+function setDot(c,t){const d=$("ppd2");d.className="sd";d.classList.add(c==="g"?"sdg":c==="y"?"sdy":"sdr");$("ppstx").textContent=t}
+
+// PAYMENT
+function buildPG(){
+  $("pgrid").innerHTML=PLANS.map((p,i)=>`
+    <div class="pc${i===1?" sel":""}" onclick="selP(${i})">
+      ${p.hot?'<div class="phot">HOT</div>':''}
+      <div class="pd">${p.l}</div>
+      <div class="pp">${fv(p.p).replace("đ","")}<sup>đ</sup></div>
+      <div class="pdur">📅 ${p.d} ngày</div>
+    </div>`).join("")
+}
+function selP(i){SP=PLANS[i];document.querySelectorAll(".pc").forEach((c,j)=>c.classList.toggle("sel",j===i));genTxn()}
+async function genTxn(){
+  try{
+    const r=await api("/api/payment/create","POST",{plan_id:SP.id});
+    if(r.ok){TX=r.txn_code;$("txc").textContent=TX;$("qamt").textContent=fv(r.amount);$("qri").src=r.qr_url;QS=300;return}
+  }catch(e){}
+  TX=[...Array(10)].map(()=>"ABCDEFGHJKLMNPQRSTUVWXYZ0123456789"[Math.floor(Math.random()*35)]).join("");
+  $("txc").textContent=TX;$("qamt").textContent=fv(SP.p);
+  $("qri").src=`https://img.vietqr.io/image/MB-02444128888-print.png?amount=${SP.p}&addInfo=${TX}%20VIPGAME&accountName=LE%20CONG%20HOAN`;QS=300
+}
+function cpTxn(){navigator.clipboard.writeText(TX);toast("Đã sao chép: "+TX,"gd")}
+function startQR(){if(QT)clearInterval(QT);QS=300;updQR();QT=setInterval(()=>{QS--;updQR();if(QS<=0)genTxn()},1000)}
+function updQR(){const m=Math.floor(QS/60).toString().padStart(2,"0"),s=(QS%60).toString().padStart(2,"0");const el=$("qcd");el.textContent=m+":"+s;el.className="qcd"+(QS<=60?" r":"")}
+function cPaid(){toast("✅ Đã ghi nhận! Admin xác nhận trong 5–15 phút","gd");window.open(TG,"_blank")}
+
+// KEY
+async function actKey(){
+  const k=$("ki").value.trim().toUpperCase(),e=$("ke");e.textContent="";e.className="kerr";
+  if(!k){e.textContent="Vui lòng nhập key.";e.classList.add("e");return}
+  const r=await api("/api/key/activate","POST",{key:k});
+  if(r.ok){e.textContent=r.msg;e.classList.add("ok");$("ki").value="";
+    const me=await api("/api/me");if(me.ok){CUR=me.user;updKey();buildGG()}
+    toast("🎉 "+r.msg,"gd");buildKT();setTimeout(()=>sTab('h'),1800)}
+  else{e.textContent=r.msg;e.classList.add("e")}
+}
+async function buildKT(){
+  const me=await api("/api/me");if(!me.ok)return;
+  const u=me.user,rows=[];
+  if(u.used_key){
+    const r=u.remain_days||0,rc=r>3?"krg":r>1?"kry":"krr",st=u.key_active?"on":"ex";
+    rows.push(`<div class="ktr"><div class="kkey">${u.used_key.slice(-12)}</div><div class="kpl">${u.key_plan||"--"}</div><div class="kr ${rc}">${r} ngày</div><div><span class="kst ${st}">${u.key_active?"Đang dùng":"Hết hạn"}</span></div></div>`)
+  }
+  $("ktb").innerHTML=rows.length?rows.join(""):'<div style="padding:14px;text-align:center;color:var(--t3);font-size:12px">Chưa có key. Mua key tại @my201901</div>'
 }
 
-/* ═════════════════════════════════════════════════
-   START APP
-══════════════════════════════════════════════════ */
-window.onload = loadConfigFromGitHub;
+// HISTORY
+async function loadHist(){
+  const me=await api("/api/me");if(!me.ok)return;
+  const h=me.user.history||[];
+  $("hl").innerHTML=h.length?h.map(x=>`<div class="hi"><div><div class="ha">${x.action}</div><div class="ht">${x.time}</div></div><i class="fas fa-chevron-right" style="color:var(--t3);font-size:11px"></i></div>`).join(""):'<div class="empty"><i class="fas fa-history"></i><p>Chưa có lịch sử</p></div>'
+}
+
+// NAV
+function sTab(t){const m={h:"th",p:"tp",k:"tk",hi:"thi"};Object.keys(m).forEach(k=>{$(m[k]).style.display=k===t?"block":"none";$("b"+k).classList.toggle("v",k===t)});if(t==="k")buildKT();if(t==="hi")loadHist();if(t==="p"){genTxn();startQR()}}
+function opnl(id){$(id).classList.add("v")}
+function cpnl(id){$(id).classList.remove("v")}
+
+// DRAG POPUP
+(()=>{
+  const h=$("ppd"),pp=$("pp");let drag=0,sx,sy,sl,st;
+  const s=(cx,cy)=>{drag=1;sx=cx;sy=cy;const r=pp.getBoundingClientRect();sl=r.left;st=r.top;pp.style.transition="none";pp.style.right="auto";pp.style.left=sl+"px";pp.style.top=st+"px"};
+  const mv=(cx,cy)=>{if(!drag)return;let l=Math.max(0,Math.min(innerWidth-pp.offsetWidth,sl+cx-sx)),t=Math.max(0,Math.min(innerHeight-pp.offsetHeight,st+cy-sy));pp.style.left=l+"px";pp.style.top=t+"px"};
+  const e=()=>{drag&&(drag=0,pp.style.transition="all .3s ease")};
+  h.addEventListener("mousedown",e=>{e.target.closest(".ppcl")||(s(e.clientX,e.clientY),e.preventDefault())});
+  h.addEventListener("touchstart",e=>{if(!e.target.closest(".ppcl")){const t=e.touches[0];s(t.clientX,t.clientY)}},{passive:false});
+  document.addEventListener("mousemove",e=>mv(e.clientX,e.clientY));
+  document.addEventListener("touchmove",e=>{if(drag){const t=e.touches[0];mv(t.clientX,t.clientY);e.preventDefault()}},{passive:false});
+  document.addEventListener("mouseup",e);document.addEventListener("touchend",e);
+})();
+
+// INIT
+(async()=>{try{const r=await api("/api/me");r.ok&&(CUR=r.user,enterMain())}catch(e){}})();
+window.addEventListener("beforeunload",()=>{if(FIV)clearInterval(FIV);if(QT)clearInterval(QT)});
 </script>
 </body>
 </html>
