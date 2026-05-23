@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>VIP GAME — Tool Dự Đoán AI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+:root{
+  --g1:#f5c518;--g2:#e6a800;--g3:#ffd84d;--g4:#c8901a;
+  --dark:#080808;--d2:#101014;--d3:#18181f;--d4:#20202a;--d5:#2a2a36;
+  --red:#ff3d3d;--green:#00d47e;--cyan:#00cfff;--purple:#a855f7;
+  --text:#f0f0f0;--text2:#999;--text3:#555;
+  --r:13px;--rs:9px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--dark);color:var(--text);overflow:hidden;position:fixed;inset:0}
+input,button,select{font-family:inherit}
+
+/* BG EFFECT */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+background:radial-gradient(ellipse 60% 40% at 20% 10%,rgba(245,197,24,.07) 0,transparent 60%),
+radial-gradient(ellipse 50% 40% at 80% 85%,rgba(168,85,247,.06) 0,transparent 60%)}
+
+/* ══════════ SCREENS ══════════ */
+.scr{display:none;position:fixed;inset:0;z-index:10}
+.scr.on{display:block}
+#sa{display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;min-height:100%}
+#sm{flex-direction:column}
+#sm.on{display:flex}
+
+/* ══════════ AUTH ══════════ */
+.acard{width:100%;max-width:400px;background:var(--d2);border:1px solid rgba(245,197,24,.12);border-radius:22px;padding:30px 24px;position:relative;overflow:hidden}
+.acard::after{content:'';position:absolute;inset:0;background:linear-gradient(145deg,rgba(245,197,24,.04) 0,transparent 50%);pointer-events:none}
+.brand{text-align:center;margin-bottom:26px}
+.brand-ico{display:inline-flex;align-items:center;justify-content:center;width:68px;height:68px;border-radius:20px;background:linear-gradient(135deg,var(--g1),var(--g4));margin-bottom:10px;box-shadow:0 0 30px rgba(245,197,24,.25)}
+.brand-ico i{font-size:30px;color:#1a1000}
+.brand-nm{font-size:24px;font-weight:900;background:linear-gradient(90deg,var(--g1),var(--g3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1px}
+.brand-sl{font-size:12px;color:var(--text2);margin-top:3px}
+.atabs{display:flex;background:var(--d4);border-radius:var(--rs);padding:3px;gap:3px;margin-bottom:20px}
+.atab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:700;background:transparent;color:var(--text2);border:none;border-radius:7px;cursor:pointer;transition:.2s}
+.atab.on{background:linear-gradient(135deg,var(--g1),var(--g2));color:#1a1000}
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:11px;color:var(--text3);margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.fg input{width:100%;padding:11px 14px;background:var(--d4);border:1px solid rgba(255,255,255,.07);border-radius:var(--rs);color:var(--text);font-size:14px;outline:none;transition:.2s}
+.fg input:focus{border-color:var(--g1);background:var(--d3)}
+.pww{position:relative}
+.pww input{padding-right:42px}
+.pweye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:15px;cursor:pointer;padding:4px}
+.aerr{font-size:12px;color:var(--red);min-height:18px;text-align:center;margin:4px 0 8px}
+.btn-g{width:100%;padding:12px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#1a1000;font-size:14px;font-weight:900;border:none;border-radius:var(--rs);cursor:pointer;letter-spacing:.5px;transition:.2s}
+.btn-g:hover{box-shadow:0 4px 20px rgba(245,197,24,.35);transform:translateY(-1px)}
+.btn-g:active{transform:translateY(0)}
+.asw{text-align:center;font-size:12px;color:var(--text2);margin-top:12px}
+.asw span{color:var(--g1);cursor:pointer;font-weight:700}
+
+/* ══════════ TOPBAR ══════════ */
+.topbar{background:var(--d2);border-bottom:1px solid rgba(255,255,255,.05);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:50;position:relative}
+.tb-l{display:flex;align-items:center;gap:9px}
+.tb-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--g1),var(--g4));display:flex;align-items:center;justify-content:center;font-size:15px;color:#1a1000}
+.tb-title{font-size:15px;font-weight:900;background:linear-gradient(90deg,var(--g1),var(--g3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tb-r{display:flex;align-items:center;gap:7px}
+.tb-chip{display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--d3);border:1px solid rgba(255,255,255,.07);border-radius:20px;cursor:pointer}
+.tb-av{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--g1),var(--g4));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#1a1000;flex-shrink:0}
+.tb-uname{font-size:12px;font-weight:700;color:var(--text)}
+.viptag{background:linear-gradient(135deg,var(--g1),var(--g2));color:#1a1000;font-size:9px;font-weight:900;padding:2px 6px;border-radius:8px}
+.tb-ibtn{background:var(--d3);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:6px 9px;color:var(--text2);font-size:14px;cursor:pointer;transition:.2s;display:flex;align-items:center}
+.tb-ibtn:hover{border-color:var(--g1);color:var(--g1)}
+
+/* ══════════ BODY ══════════ */
+.mbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:72px;position:relative;z-index:1}
+
+/* ══════════ BANNER ══════════ */
+.banner{padding:12px 14px;background:linear-gradient(135deg,rgba(245,197,24,.07),rgba(168,85,247,.05));border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ban-txt h3{font-size:14px;font-weight:800;color:var(--g1)}
+.ban-txt p{font-size:11px;color:var(--text2);margin-top:2px}
+.ks-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.ks-on{background:rgba(0,212,126,.1);border:1px solid rgba(0,212,126,.25);color:var(--green)}
+.ks-off{background:rgba(255,61,61,.1);border:1px solid rgba(255,61,61,.2);color:var(--red)}
+.dp{width:6px;height:6px;border-radius:50%;animation:dp 1.5s infinite}
+.dpg{background:var(--green)}
+.dpr{background:var(--red)}
+@keyframes dp{0%,100%{opacity:1}50%{opacity:.3}}
+.key-exp{font-size:10px;color:var(--g1);margin-top:4px;text-align:right}
+
+/* ══════════ GAME GRID ══════════ */
+.sec{padding:14px}
+.sec-title{font-size:12px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.sec-title i{color:var(--g1)}
+.ggrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gcard{background:var(--d2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.2s;position:relative}
+.gcard:active{transform:scale(.98)}
+.gcard.sel{border-color:var(--g1);box-shadow:0 0 18px rgba(245,197,24,.15)}
+.gc-thumb{height:110px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.gc-emoji{font-size:52px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
+.gc-score{position:absolute;top:7px;left:7px;background:rgba(0,0,0,.75);border-radius:10px;padding:3px 8px;font-size:10px;font-weight:700;color:var(--g1)}
+.gc-hot{position:absolute;top:7px;right:7px;background:linear-gradient(135deg,#ff3d3d,#ff6a00);border-radius:7px;padding:2px 6px;font-size:9px;font-weight:900;color:#fff}
+.gc-body{padding:9px 10px 11px}
+.gc-name{font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px}
+.gc-ai{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:3px;margin-bottom:8px}
+.gc-btn{width:100%;padding:8px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#1a1000;font-size:12px;font-weight:900;border:none;border-radius:var(--rs);cursor:pointer;font-family:inherit;transition:.15s;letter-spacing:.2px}
+.gc-btn:active{transform:scale(.97)}
+.gc-btn.lk{background:var(--d4);color:var(--text3);cursor:not-allowed}
+
+/* ══════════ BOTTOM NAV ══════════ */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--d2);border-top:1px solid rgba(255,255,255,.06);display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 6px;cursor:pointer;color:var(--text3);font-size:10px;font-weight:600;gap:3px;border:none;background:none;font-family:inherit;transition:.15s}
+.bni i{font-size:20px}
+.bni.on{color:var(--g1)}
+.bni.on i{filter:drop-shadow(0 0 6px rgba(245,197,24,.5))}
+
+/* ══════════ SLIDE PANELS ══════════ */
+.pnl{position:fixed;inset:0;z-index:200;display:none;align-items:flex-end}
+.pnl.on{display:flex}
+.pnl-bg{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px)}
+.pnl-box{background:var(--d2);border-radius:22px 22px 0 0;width:100%;max-height:93vh;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;z-index:1;padding-bottom:env(safe-area-inset-bottom)}
+.pnl-handle{width:38px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);margin:12px auto 0}
+.pnl-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 18px 10px}
+.pnl-title{font-size:16px;font-weight:900;color:var(--g1)}
+.pnl-close{background:var(--d4);border:none;color:var(--text2);width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px}
+.pnl-body{padding:0 16px 24px}
+
+/* MENU ITEMS */
+.mitem{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--d3);border-radius:var(--rs);margin-bottom:8px;cursor:pointer;border:1px solid rgba(255,255,255,.05);transition:.15s;font-size:14px;font-weight:700;color:var(--text)}
+.mitem:active{transform:scale(.98)}
+.mitem i{font-size:18px;width:22px;text-align:center}
+.mitem.danger{color:var(--red);border-color:rgba(255,61,61,.15)}
+.sep{height:1px;background:rgba(255,255,255,.05);margin:12px 0}
+
+/* ══════════ PAYMENT TAB ══════════ */
+.sec-h{margin-bottom:14px}
+.sec-h h3{font-size:15px;font-weight:800;display:flex;align-items:center;gap:7px}
+.sec-h p{font-size:12px;color:var(--text2);margin-top:3px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.pcard{background:var(--d3);border:2px solid rgba(255,255,255,.07);border-radius:var(--r);padding:14px 10px;cursor:pointer;transition:.2s;text-align:center;position:relative;overflow:hidden}
+.pcard:active{transform:scale(.97)}
+.pcard.sel{border-color:var(--g1);background:rgba(245,197,24,.06)}
+.phot{position:absolute;top:0;right:0;background:linear-gradient(135deg,var(--red),#ff6a00);font-size:9px;font-weight:900;color:#fff;padding:3px 8px;border-radius:0 var(--r) 0 var(--rs)}
+.pdays{font-size:11px;font-weight:800;color:var(--g1);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.pprice{font-size:22px;font-weight:900;color:var(--text);line-height:1.1}
+.pprice sup{font-size:13px;font-weight:600;color:var(--text2)}
+.pdur{font-size:11px;color:var(--text2);margin-top:5px}
+
+.qrcard{background:var(--d3);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);padding:14px}
+.qrtimer{text-align:center;font-size:12px;color:var(--g1);margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700}
+.qrcd{background:rgba(245,197,24,.1);border-radius:8px;padding:2px 12px;font-family:monospace;font-size:15px;font-weight:900;color:var(--g1)}
+.qrcd.red{color:var(--red);background:rgba(255,61,61,.1)}
+.qrtop{display:flex;gap:14px;align-items:flex-start}
+.qrbox{width:128px;height:128px;border-radius:var(--rs);background:#fff;padding:4px;flex-shrink:0}
+.qrbox img{width:100%;height:100%;border-radius:7px}
+.qrmeta{flex:1}
+.qrrow{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.qrrow:last-child{border-bottom:none}
+.qrl{color:var(--text2)}
+.qrv{font-weight:700;color:var(--text);font-size:11px}
+.qrv.gold{color:var(--g1);font-size:13px}
+.txnbox{display:flex;align-items:center;gap:6px;margin-top:10px;padding:8px 10px;background:var(--d4);border:1px solid rgba(245,197,24,.15);border-radius:var(--rs)}
+.txntxt{font-family:monospace;font-size:14px;font-weight:900;color:var(--g1);letter-spacing:1.5px;flex:1}
+.copybtn{background:rgba(245,197,24,.12);border:1px solid rgba(245,197,24,.2);color:var(--g1);border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.15s}
+.copybtn:active{transform:scale(.95)}
+.paycta{width:100%;padding:13px;background:linear-gradient(135deg,var(--green),#008c54);color:#fff;font-size:14px;font-weight:900;border:none;border-radius:var(--rs);cursor:pointer;font-family:inherit;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:7px;transition:.15s}
+.paycta:active{transform:scale(.98)}
+.paynote{font-size:11px;color:var(--text3);text-align:center;margin-top:8px}
+
+/* ══════════ KEY TAB ══════════ */
+.actbox{background:var(--d3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.act-title{font-size:13px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:7px;color:var(--text)}
+.actrow{display:flex;gap:8px}
+.actrow input{flex:1;padding:10px 12px;background:var(--d4);border:1px solid rgba(255,255,255,.07);border-radius:var(--rs);color:var(--text);font-size:13px;outline:none;font-family:monospace;letter-spacing:1px;text-transform:uppercase;font-weight:700;transition:.2s}
+.actrow input:focus{border-color:var(--g1)}
+.actbtn{padding:10px 16px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#1a1000;font-size:13px;font-weight:900;border:none;border-radius:var(--rs);cursor:pointer;font-family:inherit;white-space:nowrap}
+.acterr{font-size:12px;min-height:18px;margin-top:7px;padding:0 2px}
+.acterr.e{color:var(--red)}
+.acterr.ok{color:var(--green)}
+
+/* KEY TABLE */
+.ktable{background:var(--d3);border-radius:var(--r);overflow:hidden;margin-bottom:14px;border:1px solid rgba(255,255,255,.05)}
+.kth{display:grid;grid-template-columns:2fr 1fr .8fr .9fr;padding:9px 12px;background:rgba(245,197,24,.05);border-bottom:1px solid rgba(255,255,255,.05)}
+.kth span{font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.3px}
+.ktr{display:grid;grid-template-columns:2fr 1fr .8fr .9fr;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.03);align-items:center}
+.ktr:last-child{border-bottom:none}
+.kkey{font-family:monospace;font-size:10px;font-weight:700;color:var(--cyan)}
+.kplan{font-size:10px;color:var(--g1);font-weight:700}
+.krem{font-size:10px;font-weight:700}
+.krem.g{color:var(--green)}
+.krem.y{color:var(--g1)}
+.krem.r{color:var(--red)}
+.kst{font-size:9px;padding:2px 7px;border-radius:8px;font-weight:700;text-align:center;display:inline-block}
+.kst.on{background:rgba(0,212,126,.12);color:var(--green)}
+.kst.ud{background:rgba(0,207,255,.1);color:var(--cyan)}
+.kst.ex{background:rgba(255,61,61,.1);color:var(--red)}
+.kst.av{background:rgba(245,197,24,.1);color:var(--g1)}
+
+/* ══════════ HISTORY TAB ══════════ */
+.hitem{background:var(--d3);border:1px solid rgba(255,255,255,.05);border-radius:var(--rs);padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ha{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.ht{font-size:10px;color:var(--text3)}
+.empty{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty i{font-size:42px;display:block;margin-bottom:10px;opacity:.4}
+.empty p{font-size:13px}
+
+/* ══════════ PRED POPUP ══════════ */
+.pp{position:fixed;top:80px;right:14px;width:206px;z-index:300;display:none;border-radius:20px;overflow:hidden;
+background:rgba(12,12,18,.97);backdrop-filter:blur(24px);
+border:1px solid rgba(245,197,24,.12);
+box-shadow:0 8px 40px rgba(0,0,0,.6),0 0 24px rgba(245,197,24,.06);
+animation:pf 4s ease-in-out infinite;user-select:none}
+.pp.on{display:block}
+@keyframes pf{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.pp-in{padding:11px}
+.pp-drag{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;cursor:grab;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,.05)}
+.pp-drag:active{cursor:grabbing}
+.pp-hd{font-size:10px;font-weight:800;color:var(--g1);letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:5px}
+.pp-cls{background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;padding:2px}
+.pp-cn{text-align:center;font-size:10px;color:var(--text2);margin-bottom:7px;background:rgba(255,255,255,.04);border-radius:6px;padding:3px 6px}
+.pp-cn b{color:var(--g1)}
+.pp-sess{display:flex;justify-content:space-between;background:rgba(255,255,255,.04);border-radius:8px;padding:5px 9px;margin-bottom:9px;font-size:11px}
+.pp-sl{color:var(--text2)}
+.pp-sid{font-family:monospace;font-weight:900;color:var(--cyan)}
+.circles{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px}
+.circle{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;border:2px solid rgba(255,255,255,.07);color:rgba(255,255,255,.2);transition:.3s;letter-spacing:.3px}
+.ct{border-color:rgba(0,212,126,.18)}
+.cx{border-color:rgba(255,61,61,.18)}
+.circle.at{background:rgba(0,212,126,.12);border-color:var(--green);color:var(--green);box-shadow:0 0 18px rgba(0,212,126,.3);animation:cp .4s ease}
+.circle.ax{background:rgba(255,61,61,.12);border-color:var(--red);color:var(--red);box-shadow:0 0 18px rgba(255,61,61,.3);animation:cp .4s ease}
+@keyframes cp{0%{transform:scale(.8)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+.pp-res{text-align:center;margin-bottom:7px}
+.pp-pt{font-size:20px;font-weight:900;line-height:1.2}
+.pp-conf{font-size:11px;color:var(--text2);margin-top:2px}
+.pp-conf b{color:var(--g1)}
+.pp-st{display:flex;align-items:center;gap:5px;padding-top:6px;border-top:1px solid rgba(255,255,255,.04)}
+.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sdg{background:var(--green);animation:dp 1.5s infinite}
+.sdy{background:var(--g1)}
+.sdr{background:var(--red)}
+.stxt{font-size:10px;color:var(--text2);font-weight:600}
+
+/* ══════════ TOAST ══════════ */
+.toast{position:fixed;bottom:78px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--d3);border:1px solid rgba(255,255,255,.08);color:var(--text);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:900;opacity:0;transition:.28s;pointer-events:none;white-space:nowrap;max-width:90vw;text-overflow:ellipsis;overflow:hidden}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:var(--green);color:var(--green)}
+.toast.er{border-color:var(--red);color:var(--red)}
+.toast.gd{border-color:var(--g1);color:var(--g1)}
+
+/* INFO BOX */
+.infobox{background:rgba(245,197,24,.04);border:1px solid rgba(245,197,24,.1);border-radius:var(--rs);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.8}
+.infobox b{color:var(--g1)}
+
+/* SUPPORT BAR */
+.supbar{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--d3);border-radius:var(--r);margin-top:10px;border:1px solid rgba(255,255,255,.05)}
+.sup-ico{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sup-tele .sup-ico{background:rgba(0,136,204,.15);color:#0088cc}
+.sup-txt{flex:1}
+.sup-txt strong{font-size:13px;font-weight:700;display:block;color:var(--text)}
+.sup-txt span{font-size:11px;color:var(--text2)}
+.sup-link{padding:8px 14px;border-radius:var(--rs);font-size:12px;font-weight:800;text-decoration:none;color:#fff;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.sup-link.tg{background:linear-gradient(135deg,#0088cc,#006699)}
+.copyright{text-align:center;font-size:10px;color:var(--text3);padding:16px 14px;line-height:1.6}
+.copyright a{color:var(--g1);text-decoration:none}
+</style>
+</head>
+<body>
+
+<!-- ══ SCREEN AUTH ══ -->
+<div id="sa" class="scr on">
+  <div class="acard">
+    <div class="brand">
+      <div class="brand-ico"><i class="fas fa-crown"></i></div>
+      <div class="brand-nm">VIP GAME</div>
+      <div class="brand-sl">Tool Dự Đoán AI · Đa Nhà Cái · Tài Xỉu · Sicbo · BCR</div>
+    </div>
+    <div class="atabs">
+      <button class="atab on" onclick="aTab('l')">Đăng nhập</button>
+      <button class="atab" onclick="aTab('r')">Đăng ký</button>
+    </div>
+
+    <div id="fl">
+      <div class="fg"><label>Tên đăng nhập</label>
+        <input id="lu" type="text" placeholder="Nhập tên đăng nhập" autocomplete="username" oninput="this.value=this.value.toLowerCase()">
+      </div>
+      <div class="fg"><label>Mật khẩu</label>
+        <div class="pww"><input id="lp" type="password" placeholder="Mật khẩu" onkeydown="if(event.key==='Enter')doLogin()">
+          <button class="pweye" onclick="tPw('lp',this)"><i class="fa fa-eye"></i></button>
+        </div>
+      </div>
+      <div class="aerr" id="lerr"></div>
+      <button class="btn-g" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> ĐĂNG NHẬP</button>
+      <div class="asw">Chưa có tài khoản? <span onclick="aTab('r')">Đăng ký ngay</span></div>
+    </div>
+
+    <div id="fr" style="display:none">
+      <div class="fg"><label>Họ và tên</label><input id="rn" placeholder="Nguyễn Văn A"></div>
+      <div class="fg"><label>Tên đăng nhập</label><input id="ru" placeholder="Tối thiểu 4 ký tự" oninput="this.value=this.value.toLowerCase()"></div>
+      <div class="fg"><label>Mật khẩu</label>
+        <div class="pww"><input id="rp" type="password" placeholder="Tối thiểu 6 ký tự">
+          <button class="pweye" onclick="tPw('rp',this)"><i class="fa fa-eye"></i></button>
+        </div>
+      </div>
+      <div class="fg"><label>Xác nhận mật khẩu</label>
+        <div class="pww"><input id="rp2" type="password" placeholder="Nhập lại" onkeydown="if(event.key==='Enter')doReg()">
+          <button class="pweye" onclick="tPw('rp2',this)"><i class="fa fa-eye"></i></button>
+        </div>
+      </div>
+      <div class="aerr" id="rerr"></div>
+      <button class="btn-g" onclick="doReg()"><i class="fas fa-user-plus"></i> TẠO TÀI KHOẢN</button>
+      <div class="asw">Đã có tài khoản? <span onclick="aTab('l')">Đăng nhập</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN MAIN ══ -->
+<div id="sm" class="scr">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="tb-logo"><i class="fas fa-crown"></i></div>
+      <span class="tb-title">VIP GAME</span>
+    </div>
+    <div class="tb-r">
+      <div class="tb-chip" onclick="openPnl('pmenu')">
+        <div class="tb-av" id="tbav">V</div>
+        <span class="tb-uname" id="tbnm">User</span>
+        <span class="viptag" id="viptag" style="display:none">VIP</span>
+      </div>
+      <button class="tb-ibtn" onclick="openPnl('pmenu')"><i class="fas fa-bars"></i></button>
+    </div>
+  </div>
+
+  <div class="banner">
+    <div class="ban-txt">
+      <h3 id="ban-h">Xin chào! 👋</h3>
+      <p id="ban-p">Chào mừng đến VIP GAME Tool</p>
+    </div>
+    <div>
+      <div class="ks-badge ks-off" id="ksbadge"><div class="dp dpr" id="ksdot"></div><span id="kstxt">Chưa kích hoạt</span></div>
+      <div class="key-exp" id="keyexp" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- TAB HOME -->
+  <div class="mbody" id="th">
+    <div class="sec">
+      <div class="sec-title"><i class="fas fa-fire"></i> CHỌN NHÀ CÁI</div>
+      <div class="ggrid" id="ggrid"></div>
+    </div>
+    <div class="copyright">
+      © 2026 VIP GAME — Premium Gaming Hub<br>
+      Hỗ trợ & mua key: <a href="https://web.telegram.org/k/#@my201901" target="_blank">@my201901</a>
+    </div>
+  </div>
+
+  <!-- TAB THANH TOÁN -->
+  <div class="mbody" id="tp" style="display:none">
+    <div class="sec">
+      <div class="sec-h">
+        <h3><i class="fas fa-gem" style="color:var(--g1)"></i> CHỌN GÓI BẢN QUYỀN</h3>
+        <p>Chọn gói và chuyển khoản để kích hoạt tự động</p>
+      </div>
+      <div class="pgrid" id="pgrid"></div>
+      <div class="qrcard" id="qrsec">
+        <div class="qrtimer"><i class="fas fa-clock"></i> QR hết hạn sau: <span class="qrcd" id="qrcd">05:00</span></div>
+        <div class="qrtop">
+          <div class="qrbox"><img id="qrimg" src="" alt="QR"></div>
+          <div class="qrmeta">
+            <div class="qrrow"><span class="qrl">Ngân hàng</span><span class="qrv">MBBANK</span></div>
+            <div class="qrrow"><span class="qrl">Chủ TK</span><span class="qrv">LE CONG HOAN</span></div>
+            <div class="qrrow"><span class="qrl">Số TK</span><span class="qrv">02444128888</span></div>
+            <div class="qrrow"><span class="qrl">Số tiền</span><span class="qrv gold" id="qamt">--</span></div>
+          </div>
+        </div>
+        <div class="txnbox">
+          <span class="txntxt" id="txncode">----------</span>
+          <button class="copybtn" onclick="copyTxn()"><i class="fas fa-copy"></i> COPY</button>
+        </div>
+        <button class="paycta" onclick="confirmPaid()"><i class="fas fa-check-circle"></i> ĐÃ CHUYỂN KHOẢN</button>
+        <div class="paynote">Admin xác nhận trong 5-15 phút · Giao dịch tự động</div>
+      </div>
+      <div class="supbar sup-tele">
+        <div class="sup-ico"><i class="fab fa-telegram"></i></div>
+        <div class="sup-txt"><strong>Hỗ trợ thanh toán</strong><span>Liên hệ nếu gặp sự cố</span></div>
+        <a class="sup-link tg" href="https://web.telegram.org/k/#@my201901" target="_blank"><i class="fab fa-telegram"></i> Chat</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB KEY -->
+  <div class="mbody" id="tk" style="display:none">
+    <div class="sec">
+      <div class="sec-title"><i class="fas fa-key"></i> KÍCH HOẠT KEY</div>
+      <div class="actbox">
+        <div class="act-title"><i class="fas fa-unlock-alt" style="color:var(--g1)"></i> Nhập key kích hoạt</div>
+        <div class="actrow">
+          <input id="kinp" type="text" placeholder="VIP-XXXX-XXXXXXXXXX" maxlength="20" onkeydown="if(event.key==='Enter')actKey()" oninput="this.value=this.value.toUpperCase()">
+          <button class="actbtn" onclick="actKey()">KÍCH HOẠT</button>
+        </div>
+        <div class="acterr" id="kerr"></div>
+      </div>
+
+      <div class="sec-title" style="margin-top:14px"><i class="fas fa-table"></i> BẢNG KEY HỆ THỐNG</div>
+      <div class="ktable">
+        <div class="kth"><span>KEY</span><span>GÓI</span><span>CÒN LẠI</span><span>TRẠNG THÁI</span></div>
+        <div id="ktbody"></div>
+      </div>
+
+      <div class="infobox">
+        <b>📌 Lưu ý:</b> Mỗi key chỉ dùng cho <b>1 tài khoản</b>. Key hết hạn tự khóa.<br>
+        <b>💬 Mua key:</b> <a href="https://web.telegram.org/k/#@my201901" target="_blank" style="color:var(--g1)">Telegram @my201901</a>
+      </div>
+
+      <div class="supbar sup-tele">
+        <div class="sup-ico"><i class="fab fa-telegram"></i></div>
+        <div class="sup-txt"><strong>Mua key & hỗ trợ</strong><span>@my201901</span></div>
+        <a class="sup-link tg" href="https://web.telegram.org/k/#@my201901" target="_blank"><i class="fab fa-telegram"></i> Liên hệ</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB LỊCH SỬ -->
+  <div class="mbody" id="thi" style="display:none">
+    <div class="sec">
+      <div class="sec-title"><i class="fas fa-history"></i> LỊCH SỬ HOẠT ĐỘNG</div>
+      <div id="histlist"></div>
+    </div>
+  </div>
+
+  <div class="bnav">
+    <button class="bni on" id="bh" onclick="sTabs('h')"><i class="fas fa-home"></i>Trang chủ</button>
+    <button class="bni" id="bp" onclick="sTabs('p')"><i class="fas fa-gem"></i>Nạp tiền</button>
+    <button class="bni" id="bk" onclick="sTabs('k')"><i class="fas fa-key"></i>Key</button>
+    <button class="bni" id="bhi" onclick="sTabs('hi')"><i class="fas fa-history"></i>Lịch sử</button>
+  </div>
+</div>
+
+<!-- ══ PANEL MENU ══ -->
+<div class="pnl" id="pmenu">
+  <div class="pnl-bg" onclick="closePnl('pmenu')"></div>
+  <div class="pnl-box">
+    <div class="pnl-handle"></div>
+    <div class="pnl-hd"><span class="pnl-title">MENU</span><button class="pnl-close" onclick="closePnl('pmenu')">✕</button></div>
+    <div class="pnl-body">
+      <div class="mitem" onclick="closePnl('pmenu');sTabs('p')"><i class="fas fa-gem" style="color:var(--g1)"></i>💎 Nạp tiền</div>
+      <div class="mitem" onclick="closePnl('pmenu');sTabs('k')"><i class="fas fa-key" style="color:var(--g1)"></i>🔑 Mua Key</div>
+      <div class="mitem" onclick="closePnl('pmenu');sTabs('hi')"><i class="fas fa-history" style="color:var(--cyan)"></i>📋 Lịch sử</div>
+      <div class="mitem" onclick="window.open('https://web.telegram.org/k/#@my201901','_blank');closePnl('pmenu')"><i class="fab fa-telegram" style="color:#0088cc"></i>📞 Liên hệ Admin</div>
+      <div class="sep"></div>
+      <div class="mitem danger" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i>📤 Đăng xuất</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANEL GAME TYPE ══ -->
+<div class="pnl" id="pgame">
+  <div class="pnl-bg" onclick="closePnl('pgame')"></div>
+  <div class="pnl-box">
+    <div class="pnl-handle"></div>
+    <div class="pnl-hd"><span class="pnl-title" id="gptitle">Chọn loại</span><button class="pnl-close" onclick="closePnl('pgame')">✕</button></div>
+    <div class="pnl-body" id="gpbody"></div>
+  </div>
+</div>
+
+<!-- ══ POPUP DỰ ĐOÁN ══ -->
+<div class="pp" id="pp">
+  <div class="pp-in">
+    <div class="pp-drag" id="ppd">
+      <div class="pp-hd"><i class="fas fa-broadcast-tower"></i> LIVE PREDICT</div>
+      <button class="pp-cls" onclick="closePP()">✕</button>
+    </div>
+    <div class="pp-cn">Nhà cái: <b id="ppcn">---</b></div>
+    <div class="pp-sess"><span class="pp-sl">Phiên</span><span class="pp-sid" id="ppsess">---</span></div>
+    <div class="circles">
+      <div class="circle ct" id="cT">TÀI</div>
+      <i class="fas fa-bolt" style="color:rgba(255,255,255,.12);font-size:13px"></i>
+      <div class="circle cx" id="cX">XỈU</div>
+    </div>
+    <div class="pp-res">
+      <div class="pp-pt" id="pppt"><span style="color:rgba(255,255,255,.2)">Chờ...</span></div>
+      <div class="pp-conf" id="ppcf"></div>
+    </div>
+    <div class="pp-st"><div class="sdot sdr" id="ppdot"></div><span class="stxt" id="ppst">Chưa chạy</span></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+const API = "";   // empty = same origin
+const TG  = "https://web.telegram.org/k/#@my201901";
+
+const CASINOS = [
+  {id:"sunwin",  name:"Sunwin",     score:98, emoji:"🎰", hot:true,
+   games:{"Tài Xỉu":"https://era-technology-particular-domestic.trycloudflare.com/api/tx","Sicbo":"https://enquiries-indices-navigator-mega.trycloudflare.com/api/sunsicbo","Sun Phụng":"https://ntsc-fly-questionnaire-divx.trycloudflare.com/api/sunphung"}},
+  {id:"789club", name:"789Club",    score:92, emoji:"🎯", hot:false,
+   games:{"Tài Xỉu":"https://venue-integrate-aged-heavily.trycloudflare.com/api/tx"}},
+  {id:"hitclub", name:"Hitclub",    score:96, emoji:"🃏", hot:true,
+   games:{"Tài Xỉu":"https://preference-assuming-picnic-concentration.trycloudflare.com/api/tx","TX MD5":"https://preference-assuming-picnic-concentration.trycloudflare.com/api/txmd5"}},
+  {id:"b52",     name:"B52",        score:89, emoji:"🚀", hot:false,
+   games:{"TX MD5":"https://flex-knights-agree-grass.trycloudflare.com/txmd5"}},
+  {id:"son789",  name:"Son789",     score:89, emoji:"⭐", hot:false,
+   games:{"Tài Xỉu":"https://with-boating-signed-turn.trycloudflare.com/api/tx"}},
+  {id:"max789",  name:"Max789",     score:91, emoji:"👑", hot:false,
+   games:{"TX MD5":"https://deutschland-mandatory-upon-changelog.trycloudflare.com/api/tx"}},
+  {id:"68gb",    name:"68GB",       score:88, emoji:"🎮", hot:false,
+   games:{"Thường":"https://description-zen-dog-films.trycloudflare.com/api/68/thuong","MD5":"https://profiles-televisions-sic-stay.trycloudflare.com/api/68/md5"}},
+  {id:"aviator", name:"Aviator",    score:99, emoji:"✈️", hot:true,
+   games:{"Aviator":"https://preference-assuming-picnic-concentration.trycloudflare.com/api/tx"}},
+  {id:"betvip",  name:"BetVip",     score:97, emoji:"💎", hot:true,
+   games:{"Tài Xỉu":"https://eve-hydrocodone-offshore-eagle.trycloudflare.com/api/tx","TX MD5":"https://eve-hydrocodone-offshore-eagle.trycloudflare.com/api/txmd5"}},
+  {id:"lc79",    name:"Lẩu Cua 79", score:93, emoji:"🦀", hot:false,
+   games:{"Tài Xỉu":"https://strategy-cube-vinyl-warcraft.trycloudflare.com/api/tx","TX MD5":"https://strategy-cube-vinyl-warcraft.trycloudflare.com/api/txmd5"}},
+  {id:"luck8",   name:"Luck8",      score:92, emoji:"🍀", hot:false,
+   games:{"TX MD5":"https://qld-incentives-tion-boost.trycloudflare.com/api/txmd5","Sicbo 40s":"https://qld-incentives-tion-boost.trycloudflare.com/api/sicbo40"}},
+  {id:"sumvin",  name:"Sumvin",     score:90, emoji:"💰", hot:false,
+   games:{"TX MD5":"https://cricket-compressed-list-suppose.trycloudflare.com/api/md5"}}
+];
+
+const PLANS = [
+  {id:"1d", label:"KEY 1 NGÀY",   price:35000,  days:1,  hot:false},
+  {id:"3d", label:"KEY 3 NGÀY",   price:60000,  days:3,  hot:true},
+  {id:"7d", label:"KEY 7 NGÀY",   price:95000,  days:7,  hot:false},
+  {id:"1m", label:"KEY 1 THÁNG",  price:175000, days:30, hot:true},
+  {id:"2m", label:"KEY 2 THÁNG",  price:220000, days:60, hot:false},
+  {id:"3m", label:"KEY 3 THÁNG",  price:270000, days:90, hot:false},
+];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let CUR = null;           // current user object from API
+let selPlan = PLANS[1];   // default 3 ngày
+let txnCode = "";
+let qrSecs = 300, qrTm = null;
+let fetchIv = null, curSess = null, isRun = false, curApi = null, curCasino = null;
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+const $ = id => document.getElementById(id);
+function fmtVND(n){return new Intl.NumberFormat("vi-VN").format(n)+"đ"}
+function tPw(id,btn){const i=$(id);i.type=i.type==="password"?"text":"password";btn.innerHTML=i.type==="password"?'<i class="fa fa-eye"></i>':'<i class="fa fa-eye-slash"></i>'}
+
+let tTm;
+function toast(msg,type=""){
+  const t=$("toast");t.textContent=msg;t.className="toast "+(type||"");
+  void t.offsetWidth;t.classList.add("on");
+  clearTimeout(tTm);tTm=setTimeout(()=>t.classList.remove("on"),2600);
+}
+
+async function api(path, method="GET", body=null){
+  const opts={method,headers:{"Content-Type":"application/json"},credentials:"include"};
+  if(body) opts.body=JSON.stringify(body);
+  const r=await fetch(API+path,opts);
+  return r.json();
+}
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+function aTab(t){
+  document.querySelectorAll(".atab").forEach((b,i)=>b.classList.toggle("on",t==="l"?i===0:i===1));
+  $("fl").style.display=t==="l"?"block":"none";
+  $("fr").style.display=t==="r"?"block":"none";
+  $("lerr").textContent="";$("rerr").textContent="";
+}
+
+async function doLogin(){
+  const u=$("lu").value.trim(), p=$("lp").value;
+  $("lerr").textContent="";
+  if(!u||!p){$("lerr").textContent="Vui lòng nhập đầy đủ.";return}
+  const r=await api("/api/login","POST",{username:u,password:p});
+  if(r.ok){CUR=r.user;enterMain();}
+  else $("lerr").textContent=r.msg;
+}
+
+async function doReg(){
+  const n=$("rn").value.trim(),u=$("ru").value.trim(),p=$("rp").value,p2=$("rp2").value;
+  $("rerr").textContent="";
+  if(!n||!u||!p||!p2){$("rerr").textContent="Vui lòng điền đầy đủ.";return}
+  if(p!==p2){$("rerr").textContent="Mật khẩu không khớp.";return}
+  const r=await api("/api/register","POST",{name:n,username:u,password:p});
+  if(r.ok){
+    // auto login
+    const r2=await api("/api/login","POST",{username:u,password:p});
+    if(r2.ok){CUR=r2.user;enterMain();}
+  } else $("rerr").textContent=r.msg;
+}
+
+async function doLogout(){
+  stopTool();await api("/api/logout","POST");
+  CUR=null;$("lu").value="";$("lp").value="";
+  $("sm").classList.remove("on");$("sm").style.display="none";
+  $("sa").classList.add("on");aTab("l");
+  closePnl("pmenu");
+}
+
+// ══════════════════════════════════════════
+// MAIN ENTER
+// ══════════════════════════════════════════
+function enterMain(){
+  const nm=CUR.name||CUR.username;
+  const init=nm.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+  $("tbav").textContent=init;$("tbnm").textContent=nm.split(" ").pop();
+  const h=new Date().getHours();
+  const gr=h<6?"Đêm khuya":h<12?"Buổi sáng":h<18?"Buổi chiều":"Buổi tối";
+  $("ban-h").textContent=gr+" "+nm.split(" ").pop()+" 👋";
+  updateKeyUI();
+  buildGameGrid();
+  buildPlanGrid();
+  buildKeyTable();
+  renderHistory();
+  genTxn();startQRTimer();
+  $("sa").classList.remove("on");
+  $("sm").classList.add("on");$("sm").style.display="flex";
+}
+
+function updateKeyUI(){
+  const active=CUR.key_active;
+  const remain=CUR.remain_days||0;
+  $("ksbadge").className="ks-badge "+(active?"ks-on":"ks-off");
+  $("ksdot").className="dp "+(active?"dpg":"dpr");
+  $("kstxt").textContent=active?"Đang hoạt động":"Chưa kích hoạt";
+  $("viptag").style.display=active?"":"none";
+  if(active){
+    $("keyexp").style.display="block";
+    $("keyexp").textContent="⏱ Còn "+remain+" ngày · "+CUR.key_plan;
+    $("ban-p").textContent="Key còn "+remain+" ngày · "+CUR.key_plan;
+  }else{
+    $("keyexp").style.display="none";
+    $("ban-p").textContent="Kích hoạt key để dùng tool dự đoán";
+  }
+}
+
+// ══════════════════════════════════════════
+// GAME GRID
+// ══════════════════════════════════════════
+function buildGameGrid(){
+  $("ggrid").innerHTML=CASINOS.map(c=>`
+    <div class="gcard" id="gc-${c.id}" onclick="onCard('${c.id}')">
+      <div class="gc-thumb" style="background:linear-gradient(145deg,#14141a,#1c1c24)">
+        <div class="gc-emoji">${c.emoji}</div>
+        <div class="gc-score">🔥 AI ${c.score}%</div>
+        ${c.hot?'<div class="gc-hot">HOT</div>':''}
+      </div>
+      <div class="gc-body">
+        <div class="gc-name">${c.name}</div>
+        <div class="gc-ai"><span style="color:var(--red)">🔥</span> AI Score ${c.score}%</div>
+        <button class="gc-btn${CUR.key_active?'':' lk'}">${CUR.key_active?"⚡ KÍCH HOẠT":"🔒 MUA KEY"}</button>
+      </div>
+    </div>`).join("");
+}
+
+function onCard(id){
+  if(!CUR.key_active){toast("🔒 Cần kích hoạt key!","er");setTimeout(()=>sTabs('k'),700);return}
+  const c=CASINOS.find(x=>x.id===id);
+  const games=Object.keys(c.games);
+  if(games.length===1){startTool(c,games[0]);return}
+  $("gptitle").textContent=c.emoji+" "+c.name+" — Chọn loại";
+  $("gpbody").innerHTML=games.map(g=>`
+    <div class="mitem" onclick="closePnl('pgame');startTool(CASINOS.find(x=>x.id==='${id}'),'${g}')">
+      <i class="fas fa-play-circle" style="color:var(--g1)"></i> ${g}
+    </div>`).join("");
+  openPnl("pgame");
+}
+
+function startTool(casino, gname){
+  stopTool();
+  curCasino=casino;curApi=casino.games[gname];isRun=true;
+  document.querySelectorAll(".gcard").forEach(c=>c.classList.remove("sel"));
+  const gc=$("gc-"+casino.id);if(gc)gc.classList.add("sel");
+  $("ppcn").textContent=casino.emoji+" "+casino.name+" · "+gname;
+  $("pp").classList.add("on");
+  curSess=null;$("ppsess").textContent="---";
+  $("cT").className="circle ct";$("cX").className="circle cx";
+  $("pppt").innerHTML='<span style="color:rgba(255,255,255,.18)">Đang tải...</span>';
+  $("ppcf").innerHTML="";
+  setDot("y","Đang kết nối...");
+  fetchData();fetchIv=setInterval(fetchData,2000);
+  toast("▶ "+casino.name+" · "+gname,"gd");
+}
+function stopTool(){
+  isRun=false;if(fetchIv){clearInterval(fetchIv);fetchIv=null}
+  $("cT").className="circle ct";$("cX").className="circle cx";
+  setDot("r","Đã dừng");
+  document.querySelectorAll(".gcard").forEach(c=>c.classList.remove("sel"));
+}
+function closePP(){stopTool();$("pp").classList.remove("on")}
+
+// ══════════════════════════════════════════
+// FETCH API
+// ══════════════════════════════════════════
+function fetchData(){
+  if(!isRun||!curApi)return;
+  fetch(curApi+"?_="+Date.now())
+    .then(r=>r.json()).then(parseResult)
+    .catch(()=>setDot("y","Đang kết nối..."));
+}
+function parseResult(j){
+  let sid,pred,conf;
+  const d=j.data||j;
+  sid=d.phien_du_doan||d.phien||d.session||d.id||(Array.isArray(j)?j[0]?.phien:null);
+  pred=d.du_doan_phien_tiep||d.du_doan||d.predict||d.ket_qua||d.result||(Array.isArray(j)?j[0]?.ket_qua:null);
+  conf=d.do_tin_cay||d.confidence;
+  if(!sid&&!pred)return;
+  if(sid&&String(sid)!==String(curSess)){
+    curSess=String(sid);updatePred(sid,pred,conf);setDot("g","Live ●");
+  }
+}
+function updatePred(sess,pred,conf){
+  $("ppsess").textContent="#"+sess;
+  $("cT").className="circle ct";$("cX").className="circle cx";
+  const tai=pred&&/tài|tai|over|^t$|banker/i.test(String(pred));
+  const xiu=pred&&/xỉu|xiu|under|^x$|player/i.test(String(pred));
+  if(tai){$("cT").className="circle ct at";$("pppt").innerHTML='<span style="color:var(--green);font-size:22px">TÀI ▲</span>'}
+  else if(xiu){$("cX").className="circle cx ax";$("pppt").innerHTML='<span style="color:var(--red);font-size:22px">XỈU ▼</span>'}
+  else if(pred){$("pppt").innerHTML='<span style="color:var(--g1)">'+pred+'</span>'}
+  $("ppcf").innerHTML=conf?'Độ tin cậy: <b>'+conf+'</b>':'';
+}
+function setDot(c,txt){
+  const d=$("ppdot");d.className="sdot";
+  if(c==="g")d.classList.add("sdg");else if(c==="y")d.classList.add("sdy");else d.classList.add("sdr");
+  $("ppst").textContent=txt;
+}
+
+// ══════════════════════════════════════════
+// PAYMENT
+// ══════════════════════════════════════════
+function buildPlanGrid(){
+  $("pgrid").innerHTML=PLANS.map((p,i)=>`
+    <div class="pcard${i===1?" sel":""}" onclick="selPlanF(${i})">
+      ${p.hot?'<div class="phot">HOT</div>':''}
+      <div class="pdays">${p.label}</div>
+      <div class="pprice">${fmtVND(p.price).replace("đ","")}<sup>đ</sup></div>
+      <div class="pdur">📅 ${p.days} ngày</div>
+    </div>`).join("");
+}
+function selPlanF(i){
+  selPlan=PLANS[i];
+  document.querySelectorAll(".pcard").forEach((c,j)=>c.classList.toggle("sel",j===i));
+  genTxn();
+}
+async function genTxn(){
+  // Create payment on server
+  try{
+    const r=await api("/api/payment/create","POST",{plan_id:selPlan.id});
+    if(r.ok){
+      txnCode=r.txn_code;
+      $("txncode").textContent=txnCode;
+      $("qamt").textContent=fmtVND(r.amount);
+      $("qrimg").src=r.qr_url;
+      return;
+    }
+  }catch(e){}
+  // Fallback: offline mode
+  txnCode=[...Array(10)].map(()=>"ABCDEFGHJKLMNPQRSTUVWXYZ0123456789"[Math.floor(Math.random()*35)]).join("");
+  $("txncode").textContent=txnCode;
+  $("qamt").textContent=fmtVND(selPlan.price);
+  const url=`https://img.vietqr.io/image/MB-02444128888-print.png?amount=${selPlan.price}&addInfo=${txnCode}%20VIPGAME&accountName=LE%20CONG%20HOAN`;
+  $("qrimg").src=url;
+}
+function copyTxn(){navigator.clipboard.writeText(txnCode);toast("Đã sao chép: "+txnCode,"gd")}
+function startQRTimer(){
+  if(qrTm)clearInterval(qrTm);qrSecs=300;updQR();
+  qrTm=setInterval(()=>{qrSecs--;updQR();if(qrSecs<=0)genTxn()},1000);
+}
+function updQR(){
+  const m=Math.floor(qrSecs/60).toString().padStart(2,"0");
+  const s=(qrSecs%60).toString().padStart(2,"0");
+  const el=$("qrcd");el.textContent=m+":"+s;
+  el.className="qrcd"+(qrSecs<=60?" red":"");
+}
+function confirmPaid(){
+  toast("✅ Đã ghi nhận! Admin xác nhận trong 5-15 phút","gd");
+  window.open(TG,"_blank");
+}
+
+// ══════════════════════════════════════════
+// KEY
+// ══════════════════════════════════════════
+async function actKey(){
+  const k=$("kinp").value.trim().toUpperCase();
+  const err=$("kerr");err.textContent="";err.className="acterr";
+  if(!k){err.textContent="Vui lòng nhập key.";err.classList.add("e");return}
+  const r=await api("/api/key/activate","POST",{key:k});
+  if(r.ok){
+    err.textContent=r.msg;err.classList.add("ok");
+    $("kinp").value="";
+    // Refresh user info
+    const me=await api("/api/me");
+    if(me.ok){CUR=me.user;updateKeyUI();buildGameGrid();}
+    toast("🎉 "+r.msg,"gd");
+    buildKeyTable();
+    setTimeout(()=>sTabs('h'),1800);
+  }else{
+    err.textContent=r.msg;err.classList.add("e");
+  }
+}
+
+async function buildKeyTable(){
+  // Show user's key status + system info
+  const me = await api("/api/me");
+  if(!me.ok) return;
+  const user = me.user;
+  
+  // Build table with user's key + placeholder info
+  const rows = [];
+  
+  // User's current key
+  if(user.used_key){
+    const remain = user.remain_days||0;
+    let rc=remain>3?"g":remain>1?"y":"r";
+    let st=user.key_active?"on":"ex";
+    rows.push(`<div class="ktr">
+      <div class="kkey">${user.used_key.slice(-12)}</div>
+      <div class="kplan">${user.key_plan||"--"}</div>
+      <div class="krem ${rc}">${remain} ngày</div>
+      <div><span class="kst ${st}">${user.key_active?"Đang dùng":"Hết hạn"}</span></div>
+    </div>`);
+  }
+
+  // Placeholder rows showing plans available
+  if(rows.length===0){
+    rows.push(`<div style="padding:16px;text-align:center;color:var(--text3);font-size:12px">
+      Chưa có key. Mua key để kích hoạt.
+    </div>`);
+  }
+  $("ktbody").innerHTML=rows.join("");
+}
+
+// ══════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════
+async function renderHistory(){
+  const me=await api("/api/me");
+  if(!me.ok)return;
+  const hist=me.user.history||[];
+  if(!hist.length){
+    $("histlist").innerHTML='<div class="empty"><i class="fas fa-history"></i><p>Chưa có lịch sử</p></div>';
+    return;
+  }
+  $("histlist").innerHTML=hist.map(h=>`
+    <div class="hitem">
+      <div><div class="ha">${h.action}</div><div class="ht">${h.time}</div></div>
+      <i class="fas fa-chevron-right" style="color:var(--text3);font-size:12px"></i>
+    </div>`).join("");
+}
+
+// ══════════════════════════════════════════
+// NAV & PANELS
+// ══════════════════════════════════════════
+function sTabs(t){
+  const map={h:"th",p:"tp",k:"tk",hi:"thi"};
+  Object.keys(map).forEach(k=>{
+    $(map[k]).style.display=k===t?"block":"none";
+    $("b"+k).classList.toggle("on",k===t);
+  });
+  if(t==="k"){buildKeyTable()}
+  if(t==="hi"){renderHistory()}
+  if(t==="p"){genTxn();startQRTimer()}
+}
+function openPnl(id){$(id).classList.add("on")}
+function closePnl(id){$(id).classList.remove("on")}
+
+// ══════════════════════════════════════════
+// POPUP DRAG
+// ══════════════════════════════════════════
+(function(){
+  const hdr=$("ppd"),pp=$("pp");
+  let drag=false,sx,sy,sl,st;
+  const start=(cx,cy)=>{drag=true;sx=cx;sy=cy;const r=pp.getBoundingClientRect();sl=r.left;st=r.top;pp.style.transition="none";pp.style.right="auto";pp.style.left=sl+"px";pp.style.top=st+"px"};
+  const move=(cx,cy)=>{if(!drag)return;let l=sl+cx-sx,t=st+cy-sy;l=Math.max(0,Math.min(window.innerWidth-pp.offsetWidth,l));t=Math.max(0,Math.min(window.innerHeight-pp.offsetHeight,t));pp.style.left=l+"px";pp.style.top=t+"px"};
+  const end=()=>{if(drag){drag=false;pp.style.transition="all .3s ease"}};
+  hdr.addEventListener("mousedown",e=>{if(!e.target.closest(".pp-cls"))start(e.clientX,e.clientY);e.preventDefault()});
+  hdr.addEventListener("touchstart",e=>{if(!e.target.closest(".pp-cls")){const t=e.touches[0];start(t.clientX,t.clientY)}},{passive:false});
+  document.addEventListener("mousemove",e=>move(e.clientX,e.clientY));
+  document.addEventListener("touchmove",e=>{if(drag){const t=e.touches[0];move(t.clientX,t.clientY);e.preventDefault()}},{passive:false});
+  document.addEventListener("mouseup",end);document.addEventListener("touchend",end);
+})();
+
+// ══════════════════════════════════════════
+// INIT — check session
+// ══════════════════════════════════════════
+(async()=>{
+  try{
+    const r=await api("/api/me");
+    if(r.ok){CUR=r.user;enterMain();}
+  }catch(e){}
+})();
+
+window.addEventListener("beforeunload",()=>{if(fetchIv)clearInterval(fetchIv);if(qrTm)clearInterval(qrTm)});
+</script>
+</body>
+</html>
