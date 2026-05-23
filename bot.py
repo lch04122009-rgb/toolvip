@@ -14,8 +14,8 @@ import db
 
 load_dotenv()
 
-BOT_TOKEN  = os.getenv("BOT_TOKEN", "")
-ADMIN_IDS  = [int(x.strip()) for x in os.getenv("ADMIN_IDS","").split(",") if x.strip().isdigit()]
+BOT_TOKEN  = os.getenv("8547766821:AAHxHXAPqYLYWZHiDMLg78chMQeVkGySN1Y", "")
+ADMIN_IDS  = [int(x.strip()) for x in os.getenv("6009450987","").split(",") if x.strip().isdigit()]
 TG_SUPPORT = os.getenv("TG_SUPPORT", "@my201901")
 
 logging.basicConfig(
